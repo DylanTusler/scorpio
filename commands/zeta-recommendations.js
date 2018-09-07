@@ -19,8 +19,13 @@ module.exports = async ( client, message ) => {
 			await client.swapi.player(allycode, 'eng_us') :
 			await client.swapi.player(discordId, 'eng_us');
 		
+		/** Get the zeta recommendations from swapi cacher */
+		let recommendations = await client.swapi.zetas();
+
+        		
+		
 		/** 
-		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
+		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT AND RECOMMENDATIONS
 		 * */
 
 		let today = new Date();
@@ -29,7 +34,20 @@ module.exports = async ( client, message ) => {
 		let embed = {};
 		embed.title = `${player.name} - ${player.allyCode}`;
 		embed.description = '`------------------------------`\n';
-		embed.description += `Profile is ${age.minute} minutes old\n`;
+			
+	    //Nothing super special here... 
+        //Just printing the abilities that this player **doesn't have**	
+        for( let z of recommendations.zetas ) {
+            let skill = player.roster.map(u => {
+                let ss = u.skills.filter(s => s.name === z.name);
+                return ss.length > 0 ? ss[0] : null;
+            });
+            skill = skill.filter(s => s);
+            
+            if( !skill || !skill[0] || skill[0].tier === 8 ) { continue; }
+            
+            embed.description += z.name+'\n';
+        }
 		embed.description += '`------------------------------`\n';
 
 		embed.color = 0x936EBB;
