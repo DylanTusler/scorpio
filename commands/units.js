@@ -9,27 +9,25 @@ module.exports = async ( client, message ) => {
 		/** Set allycode with no dashes and turn string into a number */
 		args[0] = args[0].replace(/-/g,'');
 		
-		let allycode = args[0].match(/\d{9}/) ? args[0].match(/\d{9}/)[0] : null;
-		let discordId = args[0] === 'me' ? message.author.id : args[0].match(/\d{17,18}/) ? args[0].match(/\d{17,18}/)[0] : null;
+		let allycodes = args[0].match(/\d{9}/) ? [ args[0].match(/\d{9}/)[0] ] : [];
+		let discordIds = args[0] === 'me' ? [ message.author.id ] : args[0].match(/\d{17,18}/) ? [ args[0].match(/\d{17,18}/)[0] ] : [];
 		
-		if( !allycode && !discordId ) { throw new Error('Please provide a valid allycode or discord user'); }
+		if( allycodes.length + discordIds.length === 0 ) { throw new Error('Please provide a valid allycode or discord user'); }
 
-		/** Get player from swapi cacher */
-		let player = allycode ?
-			await client.swapi.player(allycode, 'eng_us') :
-			await client.swapi.player(discordId, 'eng_us');
+		/** Get player units from api */
+		let ids = [ allycodes ].concat([discordIds]);
+		let units = await client.swapi.units(ids, 'eng_us');
 		
 		/** 
 		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
 		 * */
 
 		let today = new Date();
-		let age = client.helpers.convertMS(today - new Date(player.updated));
 		
 		let embed = {};
-		embed.title = `${player.name} - ${player.allyCode}`;
+		embed.title = `Player Units`;
 		embed.description = '`------------------------------`\n';
-		embed.description += `Profile is ${age.minute} minutes old\n`;
+		embed.description += `${Object.keys(units).length} units\n`;
 		embed.description += '`------------------------------`\n';
 
 		embed.color = 0x936EBB;

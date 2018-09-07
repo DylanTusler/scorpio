@@ -19,9 +19,15 @@ module.exports = async ( client, message ) => {
 			await client.swapi.player(allycode, 'eng_us') :
 			await client.swapi.player(discordId, 'eng_us');
 		
+		/** Get recommendations from swapi cacher */
+		let recommendations = await client.swapi.squads();
+
+        		
+		
 		/** 
-		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
-		 * */
+		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT AND SQUAD RECOMMENDATIONS
+		 * 
+		 */
 
 		let today = new Date();
 		let age = client.helpers.convertMS(today - new Date(player.updated));
@@ -30,6 +36,10 @@ module.exports = async ( client, message ) => {
 		embed.title = `${player.name} - ${player.allyCode}`;
 		embed.description = '`------------------------------`\n';
 		embed.description += `Profile is ${age.minute} minutes old\n`;
+		
+		//Nothing super special here...
+		//Just printing the main recommendation keys 
+		embed.description += `Recommendation keys: ${Object.keys(recommendations).join('\n')}\n`;
 		embed.description += '`------------------------------`\n';
 
 		embed.color = 0x936EBB;

@@ -14,23 +14,50 @@ module.exports = async ( client, message ) => {
 		
 		if( !allycode && !discordId ) { throw new Error('Please provide a valid allycode or discord user'); }
 
+        let unitName = args.slice(1).join(' ');
+        if( !unitName ) { throw new Error('No unit provided to stats'); }
+        
 		/** Get player from swapi cacher */
 		let player = allycode ?
 			await client.swapi.player(allycode, 'eng_us') :
 			await client.swapi.player(discordId, 'eng_us');
-		
+
+        
+        let units = [];
+        for( let u of player.roster ) {
+            if( u.name.toLowerCase().includes( unitName.toLowerCase() ) ) {
+                units.push( u );
+            }
+        }
+        
+        if( units.length === 0 ) { throw new Error('No unit found in this player\'s roster'); }
+
+        let stats = await client.swapi.stats( units );      
+        		
 		/** 
 		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
 		 * */
 
 		let today = new Date();
-		let age = client.helpers.convertMS(today - new Date(player.updated));
 		
 		let embed = {};
 		embed.title = `${player.name} - ${player.allyCode}`;
 		embed.description = '`------------------------------`\n';
-		embed.description += `Profile is ${age.minute} minutes old\n`;
+		embed.description += `${units.length} unit(s) found\n`;
 		embed.description += '`------------------------------`\n';
+        
+        embed.fields = [];
+        
+        for( let u of stats ) {
+            let val = '';
+            for( let k in u.base ) {
+                val += '**'+k+'** : `'+u.base[k]+'`\n';
+            }
+            embed.fields.push({
+                name:u.unit.name+' : Base stats',
+                value:val
+            });
+        }
 
 		embed.color = 0x936EBB;
 		embed.timestamp = today;
