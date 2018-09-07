@@ -6,13 +6,18 @@ module.exports = (clientSwgoh, clientCache, clientHelpers) => {
 	
 	playerCooldown = 2;
 	guildCooldown = 6;
+	zetasCooldown = 24*7;
+	squadCooldown = 24*7;
 	
 	return {
 	    stats:stats,
 	    units:units,
 		player:player,
 		guild:guild,
-		register:register
+		register:register,
+		zetas:zetas,
+		squads:squads,
+		events:events
 	};
 
 };
@@ -201,3 +206,114 @@ async function register( allycode, discordId ) {
 	}	
 }
 
+
+/**
+ *  Fetch zetas recommendations from cache, and sync if necessary
+ * 
+ */
+async function zetas() {
+	
+	try {
+    	
+        let expiredDate = new Date();
+	        expiredDate.setHours(expiredDate.getHours() - zetasCooldown);
+		
+		/** Get player from cache */
+		let zetas = await cache.get('swapi', 'zetas', {updated:{ $gte:expiredDate.getTime() }});
+
+		/** Check if existance and expiration */
+		if( !zetas || !zetas[0] ) { 
+		
+			/** If not found or expired, fetch new from API and save to cache */
+			zetas = await swgoh.fetchZetas({});
+			
+			if( !zetas ) { throw new Error('Error fetching zeta recommendations'); } 
+			
+			zetas = await cache.put('swapi', 'zetas', {}, zetas);
+
+		} else {		
+		    zetas = zetas[0];
+		}
+
+		return zetas;
+		
+	} catch(e) { 
+		throw e; 
+	}    		
+
+}
+
+
+/**
+ *  Fetch squad recommendations from cache, and sync if necessary
+ * 
+ */
+async function squads() {
+	
+	try {
+    	
+        let expiredDate = new Date();
+	        expiredDate.setHours(expiredDate.getHours() - squadCooldown);
+		
+		/** Get player from cache */
+		let squads = await cache.get('swapi', 'squads', {updated:{ $gte:expiredDate.getTime() }});
+
+		/** Check if existance and expiration */
+		if( !squads || !squads[0] ) { 
+		
+			/** If not found or expired, fetch new from API and save to cache */
+			squads = await swgoh.fetchSquads({});
+			
+			if( !squads ) { throw new Error('Error fetching zeta recommendations'); } 
+			
+			squads = await cache.put('swapi', 'squads', {}, squads);
+
+		} else {		
+		    squads = squads[0];
+		}
+
+		return squads;
+		
+	} catch(e) { 
+		throw e; 
+	}    		
+
+}
+
+
+/**
+ *  Fetch swgoh event schedule from cache, and sync if necessary
+ * 
+ */
+async function events() {
+	
+	try {
+    	
+        let expiredDate = new Date();
+	        expiredDate.setHours(expiredDate.getHours() - eventCooldown);
+		
+		/** Get player from cache */
+		let events = await cache.get('swapi', 'events', {updated:{ $gte:expiredDate.getTime() }});
+
+		/** Check if existance and expiration */
+		if( !events || !events[0] ) { 
+		
+			/** If not found or expired, fetch new from API and save to cache */
+			events = await swgoh.fetchEvents({ language:'eng_us' });
+			
+			if( !events ) { throw new Error('Error fetching events'); } 
+			
+			events.updated = (new Date()).getTime();
+			events = await cache.put('swapi', 'events', {}, events);
+
+		} else {		
+		    events = events[0];
+		}
+
+		return events;
+		
+	} catch(e) { 
+		throw e; 
+	}    		
+
+}
