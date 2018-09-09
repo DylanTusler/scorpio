@@ -15,11 +15,24 @@
   		"username":"YOUR_API_SWGOH_HELP_USERNAME",
   		"password":"YOUR_API_SWGOH_HELP_PASSWORD"
   	},
-	"commands":{
+  	"commands":{
 		"help":"help.js",
 		"invite":"invite.js",
-		"support":"supprot.js",
-		"player":"player.js",
-		"guild":"guild.js"
-	}
-}
+		"support":"support.js",
+		"p":"player.js",
+		"g":"guild.js",
+		"add":"register.js",
+		"u":"units.js",
+		"s":"stats.js",
+		"z":"zeta-recommendations.js",
+		"sq":"squad-recommendations.js",
+		"e":"events.js",
+		"w":"whois.js"
+  	},
+	"logDB":"botLogs",
+	"playerCooldown":2,
+	"guildCooldown":6,
+	"eventCooldown":6,
+	"zetasCooldown":168,
+	"squadCooldown":168
+

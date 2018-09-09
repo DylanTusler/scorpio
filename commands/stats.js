@@ -33,7 +33,8 @@ module.exports = async ( client, message ) => {
         if( units.length === 0 ) { throw new Error('No unit found in this player\'s roster'); }
 
         let stats = await client.swapi.stats( units );      
-        		
+        stats = stats.filter(s => !s.error);
+
 		/** 
 		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
 		 * */
@@ -43,19 +44,19 @@ module.exports = async ( client, message ) => {
 		let embed = {};
 		embed.title = `${player.name} - ${player.allyCode}`;
 		embed.description = '`------------------------------`\n';
-		embed.description += `${units.length} unit(s) found\n`;
+		embed.description += `${stats.length} unit(s) found\n`;
 		embed.description += '`------------------------------`\n';
         
         embed.fields = [];
         
         for( let u of stats ) {
             let val = '';
-            for( let k in u.base ) {
-                val += '**'+k+'** : `'+u.base[k]+'`\n';
+            for( let k in u.total ) {
+                val += '**'+k+'** : `'+u.total[k]+'`\n';
             }
             embed.fields.push({
                 name:u.unit.name+' : Base stats',
-                value:val
+                value:val || "error"
             });
         }
 

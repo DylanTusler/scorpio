@@ -1,13 +1,13 @@
-module.exports = (clientSwgoh, clientCache, clientHelpers) => {
+module.exports = (client) => {
 	
-	swgoh = clientSwgoh;
-	cache = clientCache;
-	helpers = clientHelpers;
+	playerCooldown = client.settings.playerCooldown || 2;
+	guildCooldown  = client.settings.guildCooldown  || 6;
+	eventCooldown  = client.settings.squadCooldown  || 6;
+	zetasCooldown  = client.settings.zetasCooldown  || 24*7;
+	squadCooldown  = client.settings.squadCooldown  || 24*7;
 	
-	playerCooldown = 2;
-	guildCooldown = 6;
-	zetasCooldown = 24*7;
-	squadCooldown = 24*7;
+	swgoh = client.swgoh;
+	cache = client.cache;
 	
 	return {
 	    stats:stats,
@@ -15,6 +15,7 @@ module.exports = (clientSwgoh, clientCache, clientHelpers) => {
 		player:player,
 		guild:guild,
 		register:register,
+		whois:whois,
 		zetas:zetas,
 		squads:squads,
 		events:events
@@ -68,7 +69,9 @@ async function units( ids, language ) {
     	let allycodes = ids.filter(id => id.toString().match(/^\d{9}$/));
 		let discordIds = ids.filter(id => id.toString().match(/^\d{17,18}$/));
 		
-		if( (!allycodes || allycodes.length === 0) && (!discordIds || discordIds.length === 0) ) { throw new Error('Please provide a list of valid allycodes'); }
+		if( (!allycodes || allycodes.length === 0) && (!discordIds || discordIds.length === 0) ) { 
+			throw new Error('Please provide a list of valid allycodes'); 
+		}
 	
 	    let payload = {
 	        language:language,
@@ -79,9 +82,7 @@ async function units( ids, language ) {
 	    if( discordIds && discordIds.length > 0 ) { payload.discordIds = discordIds; }
 	     
 		/** If not found or expired, fetch new from API and save to cache */
-		let units = await swgoh.fetchUnits(payload);
-			
-		return units;
+		return await swgoh.fetchUnits(payload);
 		
 	} catch(e) { 
 		throw e; 
@@ -105,7 +106,9 @@ async function player( id, language ) {
 		let allycode = id.toString().match(/^\d{9}$/) ? parseInt(id.toString().match(/\d{9}/)[0]) : null;
 		let discordId = id.toString().match(/^\d{17,18}$/) ? id.toString().match(/^\d{17,18}$/)[0] : null;
 		
-		if( !allycode && !discordId ) { throw new Error('Please provide a valid allycode'); }
+		if( !allycode && !discordId ) { 
+			throw new Error('Please provide a valid allycode'); 
+		}
 		
         let expiredDate = new Date();
 	        expiredDate.setHours(expiredDate.getHours() - playerCooldown);
@@ -123,14 +126,15 @@ async function player( id, language ) {
 				await swgoh.fetchPlayer({ allycodes:[allycode], language:language, enums:true }) :
 				await swgoh.fetchPlayer({ discordIds:[discordId], language:language, enums:true });
 			
-			if( !player || player.length === 0 ) { throw new Error('No player found'); } 
+			if( !player || player.length === 0 ) { 
+				throw new Error('No player found'); 
+			} 
 			
 			if( discordId ) { player[0].discordId = discordId; }
 			player = await cache.put('swapi', 'players', {allyCode:player[0].allyCode}, player[0]);
 		} 
 
-        player = Array.isArray(player) ? player[0] : player;
-		return player;
+        return Array.isArray(player) ? player[0] : player;
 		
 	} catch(e) { 
 		throw e; 
@@ -193,7 +197,9 @@ async function register( allycode, discordId ) {
 		allycode  = allycode.toString().match(/^\d{9}$/) ? parseInt(allycode.toString().match(/\d{9}/)[0]) : null;
 		discordId = discordId.toString().match(/^\d{17,18}$/) ? discordId.toString().match(/^\d{17,18}$/)[0] : null;
 		
-		if( !allycode && !discordId ) { throw new Error('Please provide a valid allycode'); }
+		if( !allycode && !discordId ) { 
+			throw new Error('Please provide a valid allycode'); 
+		}
 
 		/** Get player from swapi cacher */
 		return await swgoh.fetchAPI('/registration', {
@@ -205,6 +211,32 @@ async function register( allycode, discordId ) {
 		throw e;
 	}	
 }
+
+
+/**
+ *  Get registrations by allycode or discordId
+ * 
+ *  Params
+ *  @allycode
+ *  @discordId
+ */
+async function whois( ids ) {
+	try {
+
+		if( !ids ) { 
+			throw new Error('Please provide one or more allycodes or discordIds'); 
+		}
+
+		/** Get player from swapi cacher */
+		return await swgoh.fetchAPI('/registration', {
+			"get":ids
+		});
+
+	} catch(e) {
+		throw e;
+	}	
+}
+
 
 
 /**
