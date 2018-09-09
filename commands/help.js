@@ -4,10 +4,12 @@ module.exports = async ( client, message ) => {
 		
 		let embed = {};
 		
-		embed.title = client.user.username+" help";
+		embed.title = client.user.username+" commands";
 
 		embed.description = '`------------------------------`\n';
-		embed.description += "This is help...\n";
+        for( let k in client.settings.commands ) {
+            embed.description += `**${client.settings.prefix}${k}** : ${client.settings.commands[k].replace('.js','').replace(/-/g,' ')}\n`;
+        }
 		embed.description += '`------------------------------`\n';
 		
 		embed.color = 0x2A6EBB;
