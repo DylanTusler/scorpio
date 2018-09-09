@@ -28,7 +28,7 @@ module.exports = async ( client, message ) => {
 		let today = new Date();
 		
 		let embed = {};
-		embed.title = player.name+' : 25 Fastest units';
+		embed.title = player.name+' : 50 Fastest units';
 		embed.description = '`------------------------------`\n';
         
         embed.fields = [];
@@ -59,15 +59,15 @@ module.exports = async ( client, message ) => {
             });
             
             speed.bonus = speed.speedStat.length > 0 ? speed.speedStat.reduce((total,num) => total + num) : 0;
-            speed.bonus += speed.speedSetsBasic >= 4 ? speed.total * 0.05 : 0;
-            speed.bonus += speed.speedSetsMax >= 4 ? speed.total * 0.1 : 0;
+            speed.bonus += speed.speedSetsBasic >= 4 ? speed.base * 0.05 : 0;
+            speed.bonus += speed.speedSetsMax >= 4 ? speed.base * 0.1 : 0;
             
             speeds.push(speed); 
         }        
         
         speeds.sort((a,b) => (b.total+b.bonus) - (a.total+a.bonus));
         
-        let lim = 25;
+        let lim = 50;
         for( let us of speeds ) {
             if( lim === 0 ) break;
             embed.description += '`'+Math.floor(us.total+us.bonus)+' (+'+Math.floor(us.bonus)+')` : '+us.unit+'\n';

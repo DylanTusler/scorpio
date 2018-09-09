@@ -4,7 +4,9 @@ module.exports = async ( client, message ) => {
 		
 		/** Split message on spaces and remove the command part */
 		let args = message.content.split(/\s+/g).slice(1);
-		if( !args || args.length < 2 ) { throw new Error('Please provide a user and an allycode'); }
+		if( !args || args.length < 2 ) { 
+		    throw new Error('Please provide a user and an allycode'); 
+		}
 		
 		/** Set discord ID from user */
 		let discordId = args[0].toLowerCase() === 'me' ? message.author.id : args[0].match(/\d{17,18}/)[0];
