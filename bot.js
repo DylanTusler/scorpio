@@ -122,7 +122,7 @@ client.on('message', async (message) => {
 	} catch(e) {
 		console.error(e);
 		let { logId, result } = await client.log.fail(log);
-		e.message += "\n[See logId"+logId+"]\n";
+		e.message += "\n[See logId: "+logId+"]\n";
 		await client.helpers.replyWithError( message, e );
 	}	
 	

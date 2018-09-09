@@ -75,7 +75,8 @@ async function units( ids, language ) {
 	
 	    let payload = {
 	        language:language,
-	        enums:true
+	        enums:true,
+	        mods:true
 	    };
 	    
 	    if( allycodes && allycodes.length > 0 ) { payload.allycodes = allycodes; }
