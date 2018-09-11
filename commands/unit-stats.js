@@ -9,9 +9,8 @@ module.exports = async ( client, message ) => {
 		/** Set allycode with no dashes and turn string into a number */
 		args[0] = args[0].replace(/-/g,'');
 		
-		let allycode = args[0].match(/\d{9}/) ? args[0].match(/\d{9}/)[0] : null;
 		let discordId = args[0] === 'me' ? message.author.id : args[0].match(/\d{17,18}/) ? args[0].match(/\d{17,18}/)[0] : null;
-		
+		let allycode = args[0].match(/^\d{9}$/) ? args[0].match(/^\d{9}$/)[0] : null;
 		if( !allycode && !discordId ) { throw new Error('Please provide a valid allycode or discord user'); }
 
         let unitName = args.slice(1).join(' ');
@@ -22,18 +21,10 @@ module.exports = async ( client, message ) => {
 			await client.swapi.player(allycode, 'eng_us') :
 			await client.swapi.player(discordId, 'eng_us');
 
-        
-        let units = [];
-        for( let u of player.roster ) {
-            if( u.name.toLowerCase().includes( unitName.toLowerCase() ) ) {
-                units.push( u );
-            }
-        }
-        
-        if( units.length === 0 ) { throw new Error('No unit found in this player\'s roster'); }
+        let unit = player.roster.filter(u => u.name.toLowerCase().includes(unitName.toLowerCase()));
+        if( unit.length === 0 ) { throw new Error( 'This player doesn\'t have a match for the unit requested'); }
 
-        let stats = await client.swapi.stats( units );      
-        stats = stats.filter(s => !s.error);
+        let stats = await client.swapi.calcStats( player.allyCode, unit[0].defId, ["includeMods","withModCalc","gameStyle"] );
 
 		/** 
 		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
@@ -42,22 +33,12 @@ module.exports = async ( client, message ) => {
 		let today = new Date();
 		
 		let embed = {};
-		embed.title = `${player.name} - ${player.allyCode}`;
+		embed.title = `${player.name} - ${unit[0].name}`;
 		embed.description = '`------------------------------`\n';
-		embed.description += `${stats.length} unit(s) found\n`;
-		embed.description += '`------------------------------`\n';
         
-        embed.fields = [];
-        
-        for( let u of stats ) {
-            let val = '';
-            for( let k in u.total ) {
-                val += '**'+k+'** : `'+u.total[k]+'`\n';
-            }
-            embed.fields.push({
-                name:u.unit.name+' : Base stats',
-                value:val || "error"
-            });
+        for( let s in stats.stats.final ) {
+           embed.description += '**'+s+'** : `'+( stats.stats.final[s] % 1 === 0 ? stats.stats.final[s] : (stats.stats.final[s] * 100).toFixed(2)+'%' );
+           embed.description += stats.stats.mods[s] ? ' (+'+( stats.stats.mods[s] % 1 === 0 ? stats.stats.mods[s] : (stats.stats.mods[s] * 100).toFixed(2)+'%' )+')`\n' : '`\n';
         }
 
 		embed.color = 0x936EBB;

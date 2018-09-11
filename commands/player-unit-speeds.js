@@ -9,8 +9,8 @@ module.exports = async ( client, message ) => {
 		/** Set allycode with no dashes and turn string into a number */
 		args[0] = args[0].replace(/-/g,'');
 		
-		let allycode = args[0].match(/\d{9}/) ? args[0].match(/\d{9}/)[0] : null;
-		let discordId = args[0] === 'me' ? message.author.id : args[0].match(/\d{17,18}/) ? args[0].match(/\d{17,18}/)[0] : null;
+		let discordId = args[0] === 'me' ? message.author.id : args[0].match(/\d{17,18}/) ? args[0].match(/\d{17,18}/)[0].toString() : null;
+		let allycode = args[0].match(/^\d{3}-*\d{3}-*\d{3}$/) ? args[0].match(/^\d{3}-*\d{3}-*\d{3}$/)[0] : null;
 		
 		if( !allycode && !discordId ) { throw new Error('Please provide a valid allycode or discord user'); }
 
@@ -43,7 +43,6 @@ module.exports = async ( client, message ) => {
                 total:stats[k].total.Speed || 0
             }
             
-
             let unit = player.roster.filter(r => r.defId === stats[k].unit.characterID)[0];
             
             speed.speedSetsBasic = unit.mods.filter(m => m.set == 4 && m.level !== 15).length,

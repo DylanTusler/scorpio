@@ -9,8 +9,8 @@ module.exports = async ( client, message ) => {
 		let ids = [];
 		for( let i of args ) {
 		    if( i === 'me' ) { ids.push(message.author.id); }
-		    if( i.match(/^\d{3}-*\d{3}-*\d{3}$/) ) { ids.push( i ); }
-		    if( i.match(/\d{17,18}/) ) { ids.push( i.match(/(\d{17,18})/)[0] ); }
+		    else if( i.match(/\d{17,18}/) ) { ids.push( i.match(/(\d{17,18})/)[0].toString() ); }
+		    else if( i.match(/^\d{3}-*\d{3}-*\d{3}$/) ) { ids.push( i ); }
 		}
 		
 		/** Register player through swapi */

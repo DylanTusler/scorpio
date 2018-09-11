@@ -11,6 +11,7 @@ module.exports = (client) => {
 	
 	return {
 	    stats:stats,
+	    calcStats:calcStats,
 	    units:units,
 		player:player,
 		guild:guild,
@@ -22,6 +23,23 @@ module.exports = (client) => {
 	};
 
 };
+
+
+/**
+ *  Fetch units from api with arrays of allycodes or discord id's
+ *  ! This will fetch direct from api and will not cache 
+ * 
+ *  Params
+ *  @ids - array of allycodes or discordIds to request (! discord Id requires patreon-tier api user)
+ *  @language - language code for reply
+ */
+async function calcStats( allycode, baseId, flags ) {
+	try {
+    	return await swgoh.calcStats( allycode, baseId, flags );
+	} catch(e) { 
+		throw e; 
+	}    		
+}
 
 
 /**
