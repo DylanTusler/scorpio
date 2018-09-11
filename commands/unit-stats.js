@@ -37,6 +37,7 @@ module.exports = async ( client, message ) => {
 		embed.description = '`------------------------------`\n';
         
         for( let s in stats.stats.final ) {
+           if( s === 'None' ) { continue; }
            embed.description += '**'+s+'** : `'+( stats.stats.final[s] % 1 === 0 ? stats.stats.final[s] : (stats.stats.final[s] * 100).toFixed(2)+'%' );
            embed.description += stats.stats.mods[s] ? ' (+'+( stats.stats.mods[s] % 1 === 0 ? stats.stats.mods[s] : (stats.stats.mods[s] * 100).toFixed(2)+'%' )+')`\n' : '`\n';
         }

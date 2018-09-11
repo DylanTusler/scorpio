@@ -107,7 +107,8 @@ client.on('message', async (message) => {
 	try {
 	
 		//Match command syntax
-		const cmdRegex = new RegExp("^("+client.settings.prefix+")(\\w+)");
+		const prefix = client.settings.prefix.replace(/([\$\^])/g,'\\$1');
+		const cmdRegex = new RegExp("^("+prefix+")(\\w+)");
 		command = message.content.match(cmdRegex) ? message.content.match(cmdRegex)[2].trim() : null;
 		
 		/** Ignore condition **/

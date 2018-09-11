@@ -50,17 +50,17 @@ async function calcStats( allycode, baseId, flags ) {
  *  @ids - array of allycodes or discordIds to request (! discord Id requires patreon-tier api user)
  *  @language - language code for reply
  */
-async function stats( units ) {
+async function stats( units, flags ) {
 	
 	try {
     	
     	let stats = null;
     	if( Array.isArray(units) ) {
     		// Get stats from array of profile roster units
-    		stats = await swgoh.unitStats(units);
+    		stats = await swgoh.rosterStats(units, flags);
     	} else {
     	    // Get stats from units index
-    		stats = await swgoh.rosterStats(units);
+    		stats = await swgoh.unitStats(units, flags);
     	}
     	
 		return stats;
