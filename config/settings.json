@@ -3,11 +3,10 @@
 	"prefix":"YOUR_PREFIX",
 	"allowed":[
 		"ALLOWED_SERVER_ID",
-		"IF_BLANK_ALL_SERVERS_ALLOWED"
+		"IF_EMPTY_THEN_ALL_SERVERS_ALLOWED"
 	],
 	"notallowed":"REPLY_MESSAGE_WHEN_SERVER_NOT_ALLOWED",
 	"botmasters":[
-		"ID_OF_BOTMASTER",
 		"ID_OF_BOTMASTER"
 	],
   	"swapi":{
@@ -16,18 +15,17 @@
   		"password":"YOUR_API_SWGOH_HELP_PASSWORD"
   	},
   	"commands":{
-		"help":"help.js",
-		"invite":"invite.js",
-		"support":"support.js",
-		"p":"player.js",
-		"g":"guild.js",
-		"add":"register.js",
-		"u":"units.js",
-		"s":"stats.js",
-		"z":"zeta-recommendations.js",
-		"sq":"squad-recommendations.js",
-		"e":"events.js",
-		"w":"whois.js"
+		"help":"this-help-menu.js",
+		"events":"event-schedule.js",
+		"player":"player-info.js",
+		"guild":"guild-info.js",
+		"speed":"player-unit-speeds.js",
+		"stats":"unit-stats.js",
+		"zeta":"zeta-next-recommendations.js",
+		"add":"register-your-allycode.js",
+		"whois":"whois-allycode-or-discord-user.js",
+		"invite":"invite-this-bot.js",
+		"support":"support-me-on-patreon.js"
   	},
 	"logDB":"botLogs",
 	"playerCooldown":2,
@@ -35,4 +33,4 @@
 	"eventCooldown":6,
 	"zetasCooldown":168,
 	"squadCooldown":168
-
+}

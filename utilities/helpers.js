@@ -1,5 +1,50 @@
 module.exports = {
 
+    parseIds: async ( message ) => {
+        try {
+        
+            /** Set allycode with no dashes and turn string into a number */
+		    let content = message.content.replace(/-/g,'');
+		    
+		    /** Split message on spaces and remove the command part */
+		    let args = content.split(/\s+/g).slice(1);
+		    if( !args || !args[0] ) { throw new Error('Please provide an allycode or discord user'); }
+		
+		    let discordIds = args.map(a => a.match(/\d{17,18}/) ? args[0].match(/\d{17,18}/)[0] : null);
+		        discordIds = discordIds.filter(d => d);
+		        
+		    let allycodes = args.map(a => a.match(/^\d{9}$/) ? args[0].match(/^\d{9}$/)[0] : null);
+		        allycodes = allycodes.filter(a => a);
+		
+		    if( allycodes.length + discordIds.length === 0 ) { throw new Error('Please provide a valid allycode or discord user'); }
+            return { allycodes:allycodes, discordIds:discordIds };
+        
+        } catch(e) {
+            throw e;
+        }
+    },
+
+    getId: async ( message ) => {
+        try {
+        
+            /** Split message on spaces and remove the command part */
+		    let args = message.content.split(/\s+/g).slice(1);
+		    if( !args || !args[0] ) { throw new Error('Please provide an allycode or discord user'); }
+		
+		    /** Set allycode with no dashes and turn string into a number */
+		    args[0] = args[0].replace(/-/g,'');
+		
+		    let discordId = args[0] === 'me' ? message.author.id : args[0].match(/\d{17,18}/) ? args[0].match(/\d{17,18}/)[0] : null;
+		    let allycode = args[0].match(/^\d{9}$/) ? args[0].match(/^\d{9}$/)[0] : null;
+		
+		    if( !allycode && !discordId ) { throw new Error('Please provide a valid allycode or discord user'); }
+            return { allycode:allycode, discordId:discordId };
+        
+        } catch(e) {
+            throw e;
+        }
+    },
+
 	isAllowed: async ( client, message ) => {
 		try {
 			const allowed = client.settings.allowed.length <= 0 || message.channel.type === 'dm' || client.settings.allowed.includes(message.guild.id);

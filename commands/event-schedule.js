@@ -2,44 +2,51 @@ module.exports = async ( client, message ) => {
 	
 	try {
 		
-		/** Split message on spaces and remove the command part */
-		let args = message.content.split(/\s+/g).slice(1);
-		if( !args || !args[0] ) { throw new Error('Please provide an allycode or discord user'); }
-		
-		/** Set allycode with no dashes and turn string into a number */
-		args[0] = args[0].replace(/-/g,'');
-		
-		let allycode = args[0].match(/\d{9}/) ? args[0].match(/\d{9}/)[0] : null;
-		let discordId = args[0] === 'me' ? message.author.id : args[0].match(/\d{17,18}/) ? args[0].match(/\d{17,18}/)[0] : null;
-		
-		if( !allycode && !discordId ) { throw new Error('Please provide a valid allycode or discord user'); }
-
-		/** Get player from swapi cacher */
-		let player = allycode ?
-			await client.swapi.player(allycode, 'eng_us') :
-			await client.swapi.player(discordId, 'eng_us');
-		
-		/** Get the zeta recommendations from swapi cacher */
+		/** Get the event schedule from swapi cacher */
 		let events = await client.swapi.events('eng_us');
 
-        		
-		
 		/** 
-		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT AND RECOMMENDATIONS
+		 * REPORT OR PROCEED TO DO STUFF WITH EVENTS
 		 * */
 
 		let today = new Date();
-		let age = client.helpers.convertMS(today - new Date(player.updated));
 		
 		let embed = {};
-		embed.title = `${player.name} - ${player.allyCode}`;
+		embed.title = 'Current event schedule';
 		embed.description = '`------------------------------`\n';
 			
-	    //Nothing super special here... 
-        //Just printing the abilities that this player **doesn't have**	
-        for( let ev of events ) {
-            embed.description += Object.keys(ev).join(', ')+'\n';
+        let schedule = [];
+        for( let ev of events.events ) {
+            if( ev.id.includes('shipevent_') ) { continue; }
+            if( ev.id.includes('restrictedmodbattle_') ) { continue; }
+            if( ev.id.includes('challenge_') ) { continue; }
+
+            ev.nameKey = ev.nameKey.replace(/\\n/g,' ')
+            ev.nameKey = ev.nameKey.replace(/\[\/*c\]/g,'')
+            ev.nameKey = ev.nameKey.replace(/\[-\]/g,'')
+            ev.nameKey = ev.nameKey.replace(/\[[\d|\w]{6}\]/g,'')
+            ev.nameKey = ev.nameKey.toLowerCase();
+            ev.nameKey = ev.nameKey.split(' ').map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+
+            if( ev.id.includes('EVENT_CREDIT_HEIST_GETAWAY_V2') || ev.id.includes('MYTHIC') || ev.id.includes('LEGENDARY') ) {
+                ev.nameKey = "**"+ev.nameKey+"**";
+            }
+            
+            for( let i of ev.instances ) {
+                if( i.endTime < today.getTime() ) { continue; }
+                schedule.push({ name:ev.nameKey, startTime:i.startTime });
+            }
         }
+        
+        schedule.sort((a,b) => a.startTime - b.startTime);
+        
+        for( let si of schedule ) {
+            let time = new Date(si.startTime).toLocaleString().split(/\s/)[0];
+                time = time.split(/-/).map(t => t >= 10 ? t : '0'+t.toString()).join('-');
+                
+            embed.description += '`'+time+'` : '+si.name+'\n';
+		}
+		
 		embed.description += '`------------------------------`\n';
 
 		embed.color = 0x936EBB;

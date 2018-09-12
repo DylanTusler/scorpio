@@ -336,7 +336,7 @@ async function squads() {
  *  Fetch swgoh event schedule from cache, and sync if necessary
  * 
  */
-async function events() {
+async function events(language) {
 	
 	try {
     	
@@ -350,11 +350,13 @@ async function events() {
 		if( !events || !events[0] ) { 
 		
 			/** If not found or expired, fetch new from API and save to cache */
-			events = await swgoh.fetchEvents({ language:'eng_us' });
+			events = {
+			    events:await swgoh.fetchEvents({ language:language }),
+			    updated:(new Date()).getTime()
+			}
 			
-			if( !events ) { throw new Error('Error fetching events'); } 
+			if( !events.events ) { throw new Error('Error fetching events'); } 
 			
-			events.updated = (new Date()).getTime();
 			events = await cache.put('swapi', 'events', {}, events);
 
 		} else {		

@@ -2,17 +2,7 @@ module.exports = async ( client, message ) => {
 	
 	try {
 		
-		/** Split message on spaces and remove the command part */
-		let args = message.content.split(/\s+/g).slice(1);
-		if( !args || !args[0] ) { throw new Error('Please provide an allycode or discord user'); }
-		
-		/** Set allycode with no dashes and turn string into a number */
-		args[0] = args[0].replace(/-/g,'');
-		
-		let allycode = args[0].match(/\d{9}/) ? args[0].match(/\d{9}/)[0] : null;
-		let discordId = args[0] === 'me' ? message.author.id : args[0].match(/\d{17,18}/) ? args[0].match(/\d{17,18}/)[0] : null;
-		
-		if( !allycode && !discordId ) { throw new Error('Please provide a valid allycode or discord user'); }
+		let { allycode, discordId } = await client.helpers.getId( message );
 
 		/** Get player from swapi cacher */
 		let player = allycode ?
@@ -29,8 +19,52 @@ module.exports = async ( client, message ) => {
 		let embed = {};
 		embed.title = `${player.name} - ${player.allyCode}`;
 		embed.description = '`------------------------------`\n';
-		embed.description += `Profile is ${age.minute} minutes old\n`;
-		embed.description += '`------------------------------`\n';
+		embed.description += 'Level: **'+player.level+'**\n';
+		embed.description += 'Guild: **'+player.guildName+'**\n';
+		embed.description += 'Total GP: **'+player.stats.filter(s => s.index === 1)[0].value.toLocaleString()+'**\n';
+
+        embed.fields = [];
+        let value = null;
+
+
+        let characters = player.roster.filter(u => u.type === 'CHARACTER' || u.type === 1);
+        
+        value = '★★★★★★★: `'+characters.filter(u => u.rarity === 7).length+'`\n';
+        value += '★★★★★★☆: `'+characters.filter(u => u.rarity === 6).length+'`\n';
+        value += '**Arena rank**: `'+player.arena.char.rank+'`\n';
+        value += '**Total zetas**: `'+characters.reduce((total,u) => parseInt(total) + parseInt(u.skills.filter(s => s.isZeta && s.tier === 8).length) || 0)+'`\n';
+        value += '**Total mods**: `'+characters.reduce((total,u) => parseInt(total) + parseInt(u.mods.length) || 0)+'`\n';
+        value += '**Level 85**: `'+characters.filter(u => u.level === 85).length+'`\n';
+        value += '**GP**: `'+player.stats.filter(s => s.index === 2)[0].value.toLocaleString()+'`\n';
+        value += '**XII+**: `'+characters.filter(u => u.gear === 12 && u.equipped.length >= 3).length+'`\n';
+        value += '**XII**: `'+characters.filter(u => u.gear === 12 && u.equipped.length < 3).length+'`\n';
+        value += '**XI**: `'+characters.filter(u => u.gear === 11).length+'`\n';
+        value += '**X**: `'+characters.filter(u => u.gear === 10).length+'`\n';
+        value += '`------------------------------`\n';
+        
+        embed.fields.push({
+            name:"Characters ( "+characters.length+" )",
+            value:value,
+            inline:true
+        });
+
+
+        let ships = player.roster.filter(u => u.type === 'SHIP' || u.type === 2);
+        
+        value = '★★★★★★★: `'+ships.filter(u => u.rarity === 7).length+'`\n';
+        value += '★★★★★★☆: `'+characters.filter(u => u.rarity === 6).length+'`\n';
+        value += '**Arena rank**: `'+player.arena.ship.rank+'`\n';
+        value += '**Hardware Lvl 3**: `'+ships.reduce((total,u) => parseInt(total) + parseInt(u.skills.filter(s => s.id.startsWith("hardware") && s.tier === 3).length) || 0)+'`\n';
+        value += '**Hardware Lvl 2**: `'+ships.reduce((total,u) => parseInt(total) + parseInt(u.skills.filter(s => s.id.startsWith("hardware") && s.tier === 2).length) || 0)+'`\n';
+        value += '**Level 85**: `'+ships.filter(u => u.level === 85).length+'`\n';
+        value += '**GP**: `'+player.stats.filter(s => s.index === 3)[0].value.toLocaleString()+'`\n';
+        value += '`------------------------------`\n';
+        
+        embed.fields.push({
+            name:"Ships ( "+ships.length+" )",
+            value:value,
+            inline:true
+        });
 
 		embed.color = 0x936EBB;
 		embed.timestamp = today;
