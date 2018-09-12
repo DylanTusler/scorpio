@@ -1,20 +1,22 @@
-module.exports = (clientSwgoh, clientCache, clientHelpers) => {
+module.exports = (client) => {
 	
-	swgoh = clientSwgoh;
-	cache = clientCache;
-	helpers = clientHelpers;
+	playerCooldown = client.settings.playerCooldown || 2;
+	guildCooldown  = client.settings.guildCooldown  || 6;
+	eventCooldown  = client.settings.squadCooldown  || 6;
+	zetasCooldown  = client.settings.zetasCooldown  || 24*7;
+	squadCooldown  = client.settings.squadCooldown  || 24*7;
 	
-	playerCooldown = 2;
-	guildCooldown = 6;
-	zetasCooldown = 24*7;
-	squadCooldown = 24*7;
+	swgoh = client.swgoh;
+	cache = client.cache;
 	
 	return {
 	    stats:stats,
+	    calcStats:calcStats,
 	    units:units,
 		player:player,
 		guild:guild,
 		register:register,
+		whois:whois,
 		zetas:zetas,
 		squads:squads,
 		events:events
@@ -31,17 +33,34 @@ module.exports = (clientSwgoh, clientCache, clientHelpers) => {
  *  @ids - array of allycodes or discordIds to request (! discord Id requires patreon-tier api user)
  *  @language - language code for reply
  */
-async function stats( units ) {
+async function calcStats( allycode, baseId, flags ) {
+	try {
+    	return await swgoh.calcStats( allycode, baseId, flags );
+	} catch(e) { 
+		throw e; 
+	}    		
+}
+
+
+/**
+ *  Fetch units from api with arrays of allycodes or discord id's
+ *  ! This will fetch direct from api and will not cache 
+ * 
+ *  Params
+ *  @ids - array of allycodes or discordIds to request (! discord Id requires patreon-tier api user)
+ *  @language - language code for reply
+ */
+async function stats( units, flags ) {
 	
 	try {
     	
     	let stats = null;
     	if( Array.isArray(units) ) {
     		// Get stats from array of profile roster units
-    		stats = await swgoh.unitStats(units);
+    		stats = await swgoh.rosterStats(units, flags);
     	} else {
     	    // Get stats from units index
-    		stats = await swgoh.rosterStats(units);
+    		stats = await swgoh.unitStats(units, flags);
     	}
     	
 		return stats;
@@ -68,20 +87,21 @@ async function units( ids, language ) {
     	let allycodes = ids.filter(id => id.toString().match(/^\d{9}$/));
 		let discordIds = ids.filter(id => id.toString().match(/^\d{17,18}$/));
 		
-		if( (!allycodes || allycodes.length === 0) && (!discordIds || discordIds.length === 0) ) { throw new Error('Please provide a list of valid allycodes'); }
+		if( (!allycodes || allycodes.length === 0) && (!discordIds || discordIds.length === 0) ) { 
+			throw new Error('Please provide a list of valid allycodes'); 
+		}
 	
 	    let payload = {
 	        language:language,
-	        enums:true
+	        enums:true,
+	        mods:true
 	    };
 	    
 	    if( allycodes && allycodes.length > 0 ) { payload.allycodes = allycodes; }
 	    if( discordIds && discordIds.length > 0 ) { payload.discordIds = discordIds; }
 	     
 		/** If not found or expired, fetch new from API and save to cache */
-		let units = await swgoh.fetchUnits(payload);
-			
-		return units;
+		return await swgoh.fetchUnits(payload);
 		
 	} catch(e) { 
 		throw e; 
@@ -105,7 +125,9 @@ async function player( id, language ) {
 		let allycode = id.toString().match(/^\d{9}$/) ? parseInt(id.toString().match(/\d{9}/)[0]) : null;
 		let discordId = id.toString().match(/^\d{17,18}$/) ? id.toString().match(/^\d{17,18}$/)[0] : null;
 		
-		if( !allycode && !discordId ) { throw new Error('Please provide a valid allycode'); }
+		if( !allycode && !discordId ) { 
+			throw new Error('Please provide a valid allycode'); 
+		}
 		
         let expiredDate = new Date();
 	        expiredDate.setHours(expiredDate.getHours() - playerCooldown);
@@ -123,14 +145,15 @@ async function player( id, language ) {
 				await swgoh.fetchPlayer({ allycodes:[allycode], language:language, enums:true }) :
 				await swgoh.fetchPlayer({ discordIds:[discordId], language:language, enums:true });
 			
-			if( !player || player.length === 0 ) { throw new Error('No player found'); } 
+			if( !player || player.length === 0 ) { 
+				throw new Error('No player found'); 
+			} 
 			
 			if( discordId ) { player[0].discordId = discordId; }
 			player = await cache.put('swapi', 'players', {allyCode:player[0].allyCode}, player[0]);
 		} 
 
-        player = Array.isArray(player) ? player[0] : player;
-		return player;
+        return Array.isArray(player) ? player[0] : player;
 		
 	} catch(e) { 
 		throw e; 
@@ -193,7 +216,9 @@ async function register( allycode, discordId ) {
 		allycode  = allycode.toString().match(/^\d{9}$/) ? parseInt(allycode.toString().match(/\d{9}/)[0]) : null;
 		discordId = discordId.toString().match(/^\d{17,18}$/) ? discordId.toString().match(/^\d{17,18}$/)[0] : null;
 		
-		if( !allycode && !discordId ) { throw new Error('Please provide a valid allycode'); }
+		if( !allycode && !discordId ) { 
+			throw new Error('Please provide a valid allycode'); 
+		}
 
 		/** Get player from swapi cacher */
 		return await swgoh.fetchAPI('/registration', {
@@ -205,6 +230,32 @@ async function register( allycode, discordId ) {
 		throw e;
 	}	
 }
+
+
+/**
+ *  Get registrations by allycode or discordId
+ * 
+ *  Params
+ *  @allycode
+ *  @discordId
+ */
+async function whois( ids ) {
+	try {
+
+		if( !ids ) { 
+			throw new Error('Please provide one or more allycodes or discordIds'); 
+		}
+
+		/** Get player from swapi cacher */
+		return await swgoh.fetchAPI('/registration', {
+			"get":ids
+		});
+
+	} catch(e) {
+		throw e;
+	}	
+}
+
 
 
 /**
@@ -285,7 +336,7 @@ async function squads() {
  *  Fetch swgoh event schedule from cache, and sync if necessary
  * 
  */
-async function events() {
+async function events(language) {
 	
 	try {
     	
@@ -299,11 +350,13 @@ async function events() {
 		if( !events || !events[0] ) { 
 		
 			/** If not found or expired, fetch new from API and save to cache */
-			events = await swgoh.fetchEvents({ language:'eng_us' });
+			events = {
+			    events:await swgoh.fetchEvents({ language:language }),
+			    updated:(new Date()).getTime()
+			}
 			
-			if( !events ) { throw new Error('Error fetching events'); } 
+			if( !events.events ) { throw new Error('Error fetching events'); } 
 			
-			events.updated = (new Date()).getTime();
 			events = await cache.put('swapi', 'events', {}, events);
 
 		} else {		

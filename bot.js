@@ -95,23 +95,36 @@ client.on('message', async (message) => {
 	/** Ignore conditions **/
 	if( message.author.bot ) { return; }
 	if( !message.content.startsWith(client.settings.prefix) ) { return; }
+
+	let command = null;
+	let log = { 
+	    date:new Date(), 
+	    user:message.author.tag,
+	    channel:message.channel.name,
+	    server:message.channel.guild.name
+	};
 	
 	try {
 	
 		//Match command syntax
-		const cmdRegex = new RegExp("^("+client.settings.prefix+")(.[\\S]+)[\\s]*");
+		const prefix = client.settings.prefix.replace(/([\$\^])/g,'\\$1');
+		const cmdRegex = new RegExp("^("+prefix+")(\\w+)");
 		command = message.content.match(cmdRegex) ? message.content.match(cmdRegex)[2].trim() : null;
 		
 		/** Ignore condition **/
 		if( !command || !client.settings.commands[command] ) { return; }
-			
+		log.command = command;
+		
 		//Do command
 		await message.react('🤔');
+		await client.log.success(log);
 		await require(client.folders.commands+client.settings.commands[command])( client, message );
 			
 	} catch(e) {
 		console.error(e);
-		client.helpers.replyWithError( message, e );
+		let { logId, result } = await client.log.fail(log);
+		e.message += "\n[See logId: "+logId+"]\n";
+		await client.helpers.replyWithError( message, e );
 	}	
 	
 });
