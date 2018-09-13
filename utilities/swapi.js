@@ -19,7 +19,9 @@ module.exports = (client) => {
 		whois:whois,
 		zetas:zetas,
 		squads:squads,
-		events:events
+		events:events,
+		
+		unitIndex:unitIndex
 	};
 
 };
@@ -60,7 +62,7 @@ async function stats( units, flags ) {
     		stats = await swgoh.rosterStats(units, flags);
     	} else {
     	    // Get stats from units index
-    		stats = await swgoh.unitStats(units, flags);
+    		stats = await swgoh.unitsStats(units, flags);
     	}
     	
 		return stats;
@@ -93,7 +95,7 @@ async function units( ids, language ) {
 	
 	    let payload = {
 	        language:language,
-	        enums:true,
+	        enums:false,
 	        mods:true
 	    };
 	    
@@ -364,6 +366,62 @@ async function events(language) {
 		}
 
 		return events;
+		
+	} catch(e) { 
+		throw e; 
+	}    		
+
+}
+
+
+/**
+ *  Fetch swgoh event schedule from cache, and sync if necessary
+ * 
+ */
+async function unitIndex(language) {
+	
+	try {
+    	
+        let expiredDate = new Date();
+	        expiredDate.setHours(expiredDate.getHours() - eventCooldown);
+		
+		/** Get units from cache */
+		let unitIndex = await cache.get('swapi', 'units', {language:language, updated:{ $gte:expiredDate.getTime() }});
+
+		/** Check if existance and expiration */
+		if( !unitIndex || !unitIndex[0] ) { 
+		
+			/** If not found or expired, fetch new from API and save to cache */
+			unitIndex = {
+			    units:await swgoh.fetchData({
+                    "collection": "unitsList",
+                    "language": language,
+                    "enums":true,
+                    "match": {
+                    	"rarity": 7
+                    },
+                    "project": {
+                        "baseId": 1,
+                        "nameKey": 1,
+                        "descKey": 1,
+                        "forceAlignment": 1,
+                        "categoryIdList": 1,
+                        "combatType": 1    
+                    }
+                }),
+			    language:language,
+			    updated:(new Date()).getTime()
+			}
+			
+			if( !unitIndex.units ) { throw new Error('Error fetching units'); } 
+			
+			unitIndex = await cache.put('swapi', 'units', {language:language}, unitIndex);
+
+		} else {		
+		    unitIndex = unitIndex[0];
+		}
+
+		return unitIndex;
 		
 	} catch(e) { 
 		throw e; 

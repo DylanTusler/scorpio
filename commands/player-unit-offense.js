@@ -19,25 +19,35 @@ module.exports = async ( client, message ) => {
 		let today = new Date();
 		
 		let embed = {};
-		embed.title = player.name+' : Top '+lim+' units : Speed';
+		embed.title = player.name+' : Top '+lim+' units : Offense';
 		embed.description = '`------------------------------`\n';
         
         embed.fields = [];
                 
-        let speeds = [];
+        let offense = [];
         for( let s in stats ) {
             let pu = player.roster.filter(pru => pru.defId === s);
-            speeds.push({
+            offense.push({
                 unit:pu[0].name,
-                speed:stats[s].stats.final.Speed,
-                bonus:stats[s].stats.mods.Speed
+                physical:{
+                    damage:stats[s].stats.final["Physical Damage"],
+                    bonus:stats[s].stats.mods["Physical Damage"]
+                },
+                special:{
+                    damage:stats[s].stats.final["Special Damage"],
+                    bonus:stats[s].stats.mods["Special Damage"]
+                }
             });
         }
-        speeds.sort((a,b) => b.speed - a.speed);
+        offense.sort((a,b) => (b.physical.damage + b.special.damage) - (a.physical.damage + a.special.damage));
 
-        for( let us of speeds ) {
+        for( let us of offense ) {
             if( lim === 0 ) break;
-            embed.description += '`'+Math.floor(us.speed)+' (+'+Math.floor(us.bonus)+')` : '+us.unit+'\n';
+            embed.fields.push({
+                name:us.unit,
+                value:'`'+Math.floor(us.physical.damage)+' (+'+Math.floor(us.physical.bonus)+')` : Physical Damage\n'+'`'+Math.floor(us.special.damage)+' (+'+Math.floor(us.special.bonus)+')` : Special Damage\n' + '`------------------------------`\n',
+                inline:true
+            });
             --lim;       
         }
 
