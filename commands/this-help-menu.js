@@ -4,10 +4,12 @@ module.exports = async ( client, message ) => {
 		
 		let embed = {};
 		
-		embed.title = client.user.username+" commands";
+		embed.title = client.user.username+' help - Prefix: '+client.settings.prefix;
 
 		embed.description = '`------------------------------`\n';
-		embed.description += 'Prefix: **'+client.settings.prefix+'**\n';
+		embed.description += 'Botmaster(s): <@!'+client.settings.botmasters.join('>, <@!')+'>\n';
+		embed.description += 'Need help? Visit [shittybots]('+client.settings.discord+')\n';
+		embed.description += 'Support me on [patreon]('+client.settings.patreon+')\n';
 		embed.description += '`------------------------------`\n';
 		
         for( let k in client.settings.commands ) {
@@ -15,10 +17,12 @@ module.exports = async ( client, message ) => {
         }
 		embed.description += '`------------------------------`\n';
 		embed.description += 'Example:\n';
-		embed.description += '`';
-		embed.description += client.settings.prefix+'add @shittybill 282392964';
-		embed.description += '`\n';
-		embed.description += '`------------------------------`\n';
+		embed.description += '```\n';
+		embed.description += client.settings.prefix+'add me 123456789\n';
+		embed.description += client.settings.prefix+'player me\n';
+		embed.description += client.settings.prefix+'zeta me\n';
+		embed.description += '```\n';
+		embed.description += '*Data provided by [api.swgoh.help](https://api.swgoh.help)*';
 		
 		
 		embed.color = 0x2A6EBB;
