@@ -1,32 +1,44 @@
 {
 	"token":"YOUR_TOKEN",
-	"prefix":"YOUR_PREFIX",
-	"allowed":[
-		"ALLOWED_SERVER_ID",
-		"IF_EMPTY_THEN_ALL_SERVERS_ALLOWED"
-	],
-	"notallowed":"REPLY_MESSAGE_WHEN_SERVER_NOT_ALLOWED",
+	"prefix":"?",
+	"allowed":[],
+	"notallowed":"If allowed has any server Id's in array, other servers trying to access bot will get this message",
+	"discord":"YOUR_DISCORD_SERVER",
+	"patreon":"YOUR_PATREON_LINK",
 	"botmasters":[
-		"ID_OF_BOTMASTER"
+		"YOUR_DISCORD_ID"
 	],
   	"swapi":{
-  		"database":"mongodb://localhost:27017/",
-  		"username":"YOUR_API_SWGOH_HELP_USERNAME",
-  		"password":"YOUR_API_SWGOH_HELP_PASSWORD"
+   		"database":"YOUR_MONGODB_CONNECTION_URL",
+  		"username":"YOUR_API.SWGOH.HELP_USERNAME",
+  		"password":"YOUR_API.SWGOH.HELP_PASSWORD"
   	},
-  	"commands":{
-		"help":"this-help-menu.js",
-		"events":"event-schedule.js",
-		"player":"player-info.js",
-		"guild":"guild-info.js",
-		"speed":"player-unit-speeds.js",
-		"stats":"unit-stats.js",
-		"zeta":"zeta-next-recommendations.js",
-		"add":"register-your-allycode.js",
-		"whois":"whois-allycode-or-discord-user.js",
-		"invite":"invite-this-bot.js",
-		"support":"support-me-on-patreon.js"
-  	},
+  	"commands":[
+      	{
+		    "help":"this-help-menu.js",
+		    "invite":"invite-this-bot.js",
+		    "swgoh":"swgoh-bots-and-tools.js",
+		    "discord":"swgoh-related-discords.js",
+		    "support":"support-me-on-patreon.js"
+		},
+        {
+		    "player":"player-info.js",
+		    "pu":"player-unit-stats.js",
+		    "po":"player-unit-offense.js",
+		    "ps":"player-unit-speeds.js",
+		    "pz":"player-zetas-acquired.js",
+		    "zeta":"next-zeta-recommendations.js"
+        },
+        {
+		    "guild":"guild-info.js",
+		    "gu":"guild-info-by-unit.js"
+        },
+		{
+		    "add":"register-your-allycode.js",
+		    "whois":"whois-allycode-or-discord-user.js",
+		    "events":"event-schedule.js"
+      	}
+  	],
 	"logDB":"botLogs",
 	"playerCooldown":2,
 	"guildCooldown":6,

@@ -1,5 +1,8 @@
 module.exports = async ( client, message ) => {
 	
+    let embed = {};
+	let retMessage = null;
+
 	try {
 		
 		let { allycode, discordId } = await client.helpers.getId( message );
@@ -18,7 +21,6 @@ module.exports = async ( client, message ) => {
         let lim = 25;
 		let today = new Date();
 		
-		let embed = {};
 		embed.title = player.name+' : Top '+lim+' units : Offense';
 		embed.description = '`------------------------------`\n';
         
@@ -57,7 +59,15 @@ module.exports = async ( client, message ) => {
 		message.channel.send({embed});
 		
 	} catch(e) {
-		throw e;
+	    if( e.code === 400 ) {
+            if( retMessage ) {
+                embed.description += '\n**! There was an error completing this request**';
+                retMessage.edit({embed}); 
+            }
+            message.reply(e.message);
+	    } else {
+		    throw e;
+		}
 	}
 
 }

@@ -72,7 +72,11 @@ module.exports = async ( client, message ) => {
 		message.channel.send({embed});
 		
 	} catch(e) {
-		throw e;
+	    if( e.code === 400 ) {
+            message.reply(e.message);
+	    } else {
+		    throw e;
+		}
 	}
 
 }

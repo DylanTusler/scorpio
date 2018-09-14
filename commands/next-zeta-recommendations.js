@@ -1,5 +1,8 @@
 module.exports = async ( client, message ) => {
 	
+    let embed = {};
+	let retMessage = null;
+
 	try {
 		
 		let { allycode, discordId } = await client.helpers.getId( message );
@@ -70,18 +73,28 @@ module.exports = async ( client, message ) => {
 		message.channel.send({embed});
 		
 	} catch(e) {
-		throw e;
+	    if( e.code === 400 ) {
+            if( retMessage ) {
+                embed.description += '\n**! There was an error completing this request**';
+                retMessage.edit({embed}); 
+            }
+            message.reply(e.message);
+	    } else {
+		    throw e;
+		}
 	}
 
 }
 
 function scoreZeta( zeta, roster ) {
-    let rankedScore = zeta.pvp + zeta.tw + zeta.tb + zeta.pit + zeta.tank + zeta.sith + zeta.versa;
+    let rankedScore = zeta.pvp * zeta.tw * zeta.tb * zeta.pit * zeta.tank * zeta.sith;
+    if( rankedScore === 0 ) { rankedScore = 999 }
+    
     let rosterScore = scoreRoster( zeta, roster );
     return rankedScore - rosterScore;
 }
 
 function scoreRoster( zeta, roster ) {
     // To-do : build a roster score based on squad support for zeta
-    return zeta.gear + zeta.rarity;
+    return (zeta.gear * zeta.rarity);
 }

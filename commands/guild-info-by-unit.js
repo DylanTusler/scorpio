@@ -1,7 +1,8 @@
 module.exports = async ( client, message ) => {
 	
+    let embed = {};
 	let retMessage = null;
-	
+		
 	try {
 		
 		let { allycode, discordId } = await client.helpers.getId( message );
@@ -29,7 +30,6 @@ module.exports = async ( client, message ) => {
 		let today = new Date();
 		let age = client.helpers.convertMS(today - new Date(guild.updated));
 		
-		let embed = {};
 		embed.title = guild.name;
 		embed.description = '__**'+unitIndex[0].nameKey+'**__\n';
 
@@ -113,8 +113,15 @@ module.exports = async ( client, message ) => {
         retMessage.edit({embed}); 
 
 	} catch(e) {
-        if( retMessage ) { retMessage.edit('RIP - An error occured with this request'); }
-        throw e;
+	    if( e.code === 400 ) {
+            if( retMessage ) {
+                embed.description += '\n**! There was an error completing this guild request**';
+                retMessage.edit({embed}); 
+            }
+            message.reply(e.message);
+	    } else {
+		    throw e;
+		}
 	}
 
 }

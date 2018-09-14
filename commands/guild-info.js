@@ -1,5 +1,6 @@
 module.exports = async ( client, message ) => {
 	
+    let embed = {};
 	let retMessage = null;
 	
 	try {
@@ -21,7 +22,6 @@ module.exports = async ( client, message ) => {
 		let today = new Date();
 		let age = client.helpers.convertMS(today - new Date(guild.updated));
 		
-		let embed = {};
 		embed.title = `${guild.name}`;
 		embed.description = guild.desc ? '**'+guild.desc+'**\n' : '';
 		embed.description += guild.message ? '`'+guild.message+'`\n' : '';
@@ -189,7 +189,15 @@ module.exports = async ( client, message ) => {
         retMessage.edit({embed}); 
 
 	} catch(e) {
-		throw e;
+	    if( e.code === 400 ) {
+            if( retMessage ) {
+                embed.description += '\n**! There was an error completing this guild request**';
+                retMessage.edit({embed}); 
+            }
+            message.reply(e.message);
+	    } else {
+		    throw e;
+		}
 	}
 
 }
