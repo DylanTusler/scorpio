@@ -4,6 +4,11 @@ module.exports = async ( client ) => {
 		
 		/** INIT CLIENT SETTINGS **/
 		client.settings = require(client.folders.config+( process.argv[2] || 'settings' )+'.json');
+        client.settings.commandsMap = {};
+        
+        for( let c of client.settings.commands ) {
+    		client.settings.commandsMap = Object.assign(client.settings.commandsMap, c);
+    	}
 		
 		/** INIT CLIENT HELPERS */
 		client.helpers = require(client.folders.utilities+'helpers.js');		

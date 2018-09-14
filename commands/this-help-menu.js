@@ -8,12 +8,14 @@ module.exports = async ( client, message ) => {
 
 		embed.description = '`------------------------------`\n';
 		embed.description += 'Botmaster(s): <@!'+client.settings.botmasters.join('>, <@!')+'>\n';
-		embed.description += 'Need help? Visit [shittybots]('+client.settings.discord+')\n';
-		embed.description += 'Support me on [patreon]('+client.settings.patreon+')\n';
-		embed.description += '`------------------------------`\n';
+		embed.description += client.settings.discord ? 'Need help? Visit [shittybots]('+client.settings.discord+')\n' : '';
+		embed.description += client.settings.patreon ? 'Support me on [patreon]('+client.settings.patreon+')\n' : '';
 		
-        for( let k in client.settings.commands ) {
-            embed.description += `**${k}** : ${client.settings.commands[k].replace('.js','').replace(/-/g,' ')}\n`;
+        for( let c of client.settings.commands ) {
+    		embed.description += '`------------------------------`\n';
+            for( let k in c ) {
+                embed.description += `**${k}** : ${c[k].replace('.js','').replace(/-/g,' ')}\n`;
+            }
         }
 		embed.description += '`------------------------------`\n';
 		embed.description += 'Example:\n';

@@ -1,38 +1,58 @@
 module.exports = async ( client, message ) => {
 	
+    let embed = {};
+	let retMessage = null;
+
 	try {
 		
-		/** Split message on spaces and remove the command part */
-		let args = message.content.split(/\s+/g).slice(1);
-		if( !args || args.length < 2 ) { 
-		    throw new Error('Please provide a user and an allycode'); 
-		}
-		
-		/** Set discord ID from user */
-		let discordId = args[0].toLowerCase() === 'me' ? message.author.id : args[0].match(/\d{17,18}/)[0];
-		
-		/** Set allycode with no dashes and turn string into a number */
-		let allycode = args[1].replace(/-/g,'');
-		if( isNaN(allycode) || allycode.length !== 9 ) { throw new Error('Please provide a valid allycode'); }
-		allycode = parseInt(allycode);
+		let { allycodes, discordIds } = await client.helpers.parseIds( message );
 
 		/** Register player through swapi */
-		let register = await client.swapi.register(allycode, discordId);
+		if( !allycodes || allycodes.length === 0 ) { 
+	        let error = new Error('Please provide an allycode'); 
+	        error.code = 400;
+	        throw error;
+		}
+		if( !discordIds || discordIds.length === 0 ) { 
+	        let error = new Error('Please provide a discord user, or "me"'); 
+	        error.code = 400;
+	        throw error;
+		}
 		
-		/** 
-		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
-		 * */
-
+		
+		let register = await client.swapi.register(allycodes[0], discordIds[0]);
+		
 		let today = new Date();
 		
-		let description = '```json\n';
-		description += JSON.stringify(register,null,2);
-		description += '```\n';
-
-		message.channel.send(description);
+		embed.title = 'Registration';
+        embed.description = '';
+		        
+		if( register.put[0].upserted ) {
+		    embed.title = 'Registration successful';
+		    embed.description = 'Allycode: `'+register.get[0].allyCode+'` has been registered to <@'+register.get[0].discordId+'>\n';
+		} else {
+		    
+		    if( register.put[0].nModified > 0 ) {
+		        embed.title = 'Registration updated';
+		        embed.description = 'Allycode: `'+register.get[0].allyCode+'` is now registered to <@'+register.get[0].discordId+'>\n';
+		    } else {
+		        embed.description += 'Allycode: `'+register.get[0].allyCode+'` is already registered to <@'+register.get[0].discordId+'>\n';
+		    }
+		
+		}
+		
+		message.channel.send({embed});
 		
 	} catch(e) {
-		throw e;
+	    if( e.code === 400 ) {
+            if( retMessage ) {
+                embed.description += '\n**! There was an error completing this request**';
+                retMessage.edit({embed}); 
+            }
+            message.reply(e.message);
+	    } else {
+		    throw e;
+		}
 	}
 
 }

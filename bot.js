@@ -112,13 +112,13 @@ client.on('message', async (message) => {
 		command = message.content.match(cmdRegex) ? message.content.match(cmdRegex)[2].trim() : null;
 		
 		/** Ignore condition **/
-		if( !command || !client.settings.commands[command] ) { return; }
+		if( !command || !client.settings.commandsMap[command] ) { return; }
 		log.command = command;
 		
 		//Do command
 		await message.react('🤔');
 		await client.log.success(log);
-		await require(client.folders.commands+client.settings.commands[command])( client, message );
+		await require(client.folders.commands+client.settings.commandsMap[command])( client, message );
 			
 	} catch(e) {
 		console.error(e);
