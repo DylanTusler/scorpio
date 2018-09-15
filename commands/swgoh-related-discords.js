@@ -6,8 +6,14 @@ module.exports = async ( client, message ) => {
 	    embed.title = "Discord funnel";
 		embed.description = '`------------------------------`\n';
 	    embed.description += '**Game changer discords**\n';
+	    embed.description += '✦ [Skelturix](https://discord.gg/yaeTEaP) \n';
 	    embed.description += '✦ [CubsFanHan](https://discord.gg/QC6gCNX) \n';
 	    embed.description += '✦ [Halfface01](https://discord.gg/aVxHPFp) \n';
+	    
+	    embed.description += '✦ [Nukin](https://discord.gg/S4wWRQW) \n';
+	    embed.description += '✦ [DBOfficial125](https://discord.gg/VkBc7w4) \n';
+	    embed.description += '✦ [Urza](https://discord.gg/7gKKhBe) \n';
+	    
 	    embed.description += '✦ [Remon Δzαb](https://discord.gg/jGeSQUW) \n';
 	    embed.description += '✦ [AhnoldT101](https://discord.gg/eT3SZCj) \n';
 	    embed.description += '✦ [MobileGamer](https://discord.gg/tN9CSmj) \n';

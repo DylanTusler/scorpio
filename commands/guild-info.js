@@ -12,8 +12,8 @@ module.exports = async ( client, message ) => {
 
 		/** Get player from swapi cacher */
 		let guild = allycode ? 
-			await client.swapi.guild(allycode, 'eng_us') :
-			await client.swapi.guild(discordId, 'eng_us');
+			await client.swapi.guild(allycode, client.settings.swapi.language) :
+			await client.swapi.guild(discordId, client.settings.swapi.language);
 
 		/** 
 		 * REPORT OR PROCEED WITH TO DO STUFF WITH GUILD OBJECT 
@@ -44,7 +44,7 @@ module.exports = async ( client, message ) => {
         let zetas = 0;
         
         let allycodes = guild.roster.map(p => p.allyCode);
-        let units = await client.swapi.units( allycodes, 'eng_us' );
+        let units = await client.swapi.units( allycodes, client.settings.swapi.language );
          
         
         embed.fields = [];

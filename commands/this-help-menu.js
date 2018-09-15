@@ -8,8 +8,9 @@ module.exports = async ( client, message ) => {
 
 		embed.description = '`------------------------------`\n';
 		embed.description += 'Botmaster(s): <@!'+client.settings.botmasters.join('>, <@!')+'>\n';
-		embed.description += client.settings.discord ? 'Need help? Visit [shittybots]('+client.settings.discord+')\n' : '';
-		embed.description += client.settings.patreon ? 'Support me on [patreon]('+client.settings.patreon+')\n' : '';
+		embed.description += client.settings.discord ? 'Need help?  Visit me on [ShittyBots]('+client.settings.discord+')\n' : '';
+		embed.description += 'Node dev?  Fork me on [GitHub](https://github.com/r3volved/scorpio)\n';
+		embed.description += client.settings.patreon ? 'Bot lover?  Support me on [Patreon]('+client.settings.patreon+')\n' : '';
 		
         for( let c of client.settings.commands ) {
     		embed.description += '`------------------------------`\n';

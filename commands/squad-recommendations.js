@@ -6,18 +6,11 @@ module.exports = async ( client, message ) => {
 
 		/** Get player from swapi cacher */
 		let player = allycode ?
-			await client.swapi.player(allycode, 'eng_us') :
-			await client.swapi.player(discordId, 'eng_us');
+			await client.swapi.player(allycode, client.settings.swapi.language) :
+			await client.swapi.player(discordId, client.settings.swapi.language);
 		
 		/** Get recommendations from swapi cacher */
 		let recommendations = await client.swapi.squads();
-
-        		
-		
-		/** 
-		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT AND SQUAD RECOMMENDATIONS
-		 * 
-		 */
 
 		let today = new Date();
 		let age = client.helpers.convertMS(today - new Date(player.updated));
