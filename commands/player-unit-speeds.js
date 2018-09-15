@@ -9,8 +9,8 @@ module.exports = async ( client, message ) => {
 
 		/** Get player from swapi cacher */
 		let player = allycode ?
-			await client.swapi.player(allycode, 'eng_us') :
-			await client.swapi.player(discordId, 'eng_us');
+			await client.swapi.player(allycode, client.settings.swapi.language) :
+			await client.swapi.player(discordId, client.settings.swapi.language);
 
         let stats = await client.swapi.calcStats( player.allyCode, null, ["includeMods","withModCalc","gameStyle"] );
         

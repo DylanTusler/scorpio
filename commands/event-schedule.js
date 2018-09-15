@@ -3,7 +3,7 @@ module.exports = async ( client, message ) => {
 	try {
 		
 		/** Get the event schedule from swapi cacher */
-		let events = await client.swapi.events('eng_us');
+		let events = await client.swapi.events(client.settings.swapi.language);
 
 		/** 
 		 * REPORT OR PROCEED TO DO STUFF WITH EVENTS

@@ -9,17 +9,12 @@ module.exports = async ( client, message ) => {
 
 		/** Get player from swapi cacher */
 		let player = allycode ?
-			await client.swapi.player(allycode, 'eng_us') :
-			await client.swapi.player(discordId, 'eng_us');
+			await client.swapi.player(allycode, client.settings.swapi.language) :
+			await client.swapi.player(discordId, client.settings.swapi.language);
 		
 		/** Get the zeta recommendations from swapi cacher */
 		let recommendations = await client.swapi.zetas();
 
-        		
-		
-		/** 
-		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT AND RECOMMENDATIONS
-		 * */
 
 		let today = new Date();
 		let age = client.helpers.convertMS(today - new Date(player.updated));
@@ -27,8 +22,6 @@ module.exports = async ( client, message ) => {
 		let embed = {};
 		embed.title = `${player.name} - Next 20 best Zetas`;
 		embed.description = '`------------------------------`\n';
-		//embed.description += '`score : unit : skill`\n';
-		//embed.description += '`------------------------------`\n';
 			
 	    let availableZetas = [];
         for( let z of recommendations.zetas ) {

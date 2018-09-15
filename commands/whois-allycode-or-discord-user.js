@@ -1,10 +1,17 @@
 module.exports = async ( client, message ) => {
 	
+	let description = '';
+	let retMessage = null;
+	
 	try {
 		
 		/** Split message on spaces and remove the command part */
 		let args = message.content.split(/\s+/g).slice(1);
-		if( !args ) { throw new Error('Please provide a user or allycode'); }
+		if( !args ) { 
+	        let error = new Error('Please provide an allycode or discord user'); 
+	        error.code = 400;
+	        throw error;
+		}
 		
 		let ids = [];
 		for( let i of args ) {
@@ -16,20 +23,24 @@ module.exports = async ( client, message ) => {
 		/** Register player through swapi */
 		let register = await client.swapi.whois(ids);
 		
-		/** 
-		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
-		 * */
 
 		let today = new Date();
 		
-		let description = '';
 		for( let d of register.get ) {
     		description += '<@!'+d.discordId+'> : '+d.allyCode+'\n';
         }
 		message.channel.send(description);
 		
 	} catch(e) {
-		throw e;
+	    if( e.code === 400 ) {
+            if( retMessage ) {
+                description += '\n**! There was an error completing this request**';
+                retMessage.edit(description); 
+            }
+            message.reply(e.message);
+	    } else {
+		    throw e;
+		}
 	}
 
 }

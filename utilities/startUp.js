@@ -25,6 +25,13 @@ module.exports = async ( client ) => {
 		const ApiSwgohHelp = require('api-swgoh-help');
 		client.swgoh = new ApiSwgohHelp(client.settings.swapi);
 		client.swapi = await require(client.folders.utilities+'swapi.js')( client );
+
+        
+        const fs = require('fs');
+        if( fs.existsSync(client.folders.utilities+'swgohAPI') ) {
+            let gbapiSettings = await require(client.folders.utilities+'swgohAPI/swgoh.settings.json');
+            client.bgapi = await require(client.folders.utilities+'swgohAPI')(gbapiSettings);
+        }
 		
 	} catch(e) {
 		console.error(e);

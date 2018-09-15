@@ -6,8 +6,8 @@ module.exports = async ( client, message ) => {
 
 		/** Get player from swapi cacher */
 		let player = allycode ?
-			await client.swapi.player(allycode, 'eng_us') :
-			await client.swapi.player(discordId, 'eng_us');
+			await client.swapi.player(allycode, client.settings.swapi.language) :
+			await client.swapi.player(discordId, client.settings.swapi.language);
 		
 		/** 
 		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
@@ -24,16 +24,16 @@ module.exports = async ( client, message ) => {
         let value = null;
 
 
-let total = 0;
-let characters = player.roster.filter(u => u.type === 'CHARACTER' || u.type === 1);
-let zetas = characters.map(c => {
-    return { name:c.name, zs:c.skills.filter(s => s.isZeta && s.tier === 8) }
-}).sort((a,b) => b.zs.length - a.zs.length);
+        let total = 0;
+        let characters = player.roster.filter(u => u.type === 'CHARACTER' || u.type === 1);
+        let zetas = characters.map(c => {
+            return { name:c.name, zs:c.skills.filter(s => s.isZeta && s.tier === 8) }
+        }).sort((a,b) => b.zs.length - a.zs.length);
 
-for( let z of zetas ) {
-    embed.description += z.zs.length > 0 ? z.name+" "+"✦".repeat(z.zs.length)+'\n' : '';
-    total += z.zs.length;            
-}   
+        for( let z of zetas ) {
+            embed.description += z.zs.length > 0 ? z.name+" "+"✦".repeat(z.zs.length)+'\n' : '';
+            total += z.zs.length;            
+        }   
         
         embed.title += '( '+total+' )'
 		embed.description += '`------------------------------`\n';

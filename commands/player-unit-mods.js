@@ -28,8 +28,6 @@ module.exports = async ( client, message ) => {
 	        throw error;
         }
 
-        let stats = await client.swapi.calcStats( player.allyCode, unit[0].defId, ["includeMods","withModCalc","gameStyle"] );
-
 		/** 
 		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
 		 * */
@@ -37,36 +35,7 @@ module.exports = async ( client, message ) => {
 		let today = new Date();
 		
 		embed.title = `${player.name} - ${unit[0].name}`;
-        embed.description = '**L'+unit[0].level+'** | **G'+unit[0].gear+'** | '+'★'.repeat(unit[0].rarity)+'☆'.repeat(7-unit[0].rarity)+'\n';
-		embed.description += '`------------------------------`\n';
-		
-		unit[0].skills.sort((a,b) => a.id.charAt(0) - b.id.charAt(0));
-		
-        for( let sk of unit[0].skills ) {
-            let stype = sk.id.split(/_/)[0].replace('skill','');
-                stype = stype.charAt(0).toUpperCase()+stype.slice(1);
-                
-            if( sk.isZeta ) {
-                embed.description += sk.tier === 8 ? '**✦** ' : '';
-                embed.description += sk.tier < 8 ? '⟡ ' : '';
-            } else {
-                embed.description += sk.tier === 8 ? '`⭓` ' : '';
-                embed.description += sk.tier < 8 ? '`⭔` ' : '';
-            }
-
-            embed.description += '**'+stype+'** : ';
-            embed.description += '`'+sk.name+' - L'+sk.tier+'`\n';
-        }        
-
-        embed.description += '`------------------------------`\n';
-
-        for( let s in stats.stats.final ) {
-           if( s === 'None' ) { continue; }
-           embed.description += '**'+s+'** : `'+( stats.stats.final[s] % 1 === 0 ? stats.stats.final[s] : (stats.stats.final[s] * 100).toFixed(2)+'%' );
-           embed.description += stats.stats.mods[s] ? ' (+'+( stats.stats.mods[s] % 1 === 0 ? stats.stats.mods[s] : (stats.stats.mods[s] * 100).toFixed(2)+'%' )+')`\n' : '`\n';
-        }
-
-		embed.description += '`------------------------------`\n';
+		embed.description = '`------------------------------`\n';
 
         embed.fields = [];
         
@@ -90,17 +59,17 @@ module.exports = async ( client, message ) => {
             name += modLevel( m.level, m.tier );
             name += ' ['+'⚬'.repeat(m.pips)+'-'.repeat(6 - m.pips)+']`\n';
             
-            value = '**Mod Set** : ';
+            value = '**Set** : ';
             value += '`'+modSet( m.set )+'`\n';
             
-            value += '**Primary** : ';
+            value += '**Primary Stat**\n';
             value += '`'+m.primaryBonusValue+' '+modStat( m.primaryBonusType )+'`\n';
 
-            //value += '**Secondary Stats**\n';
-            //value += m.secondaryType_1.length > 0 ? '`'+m.secondaryValue_1+' '+modStat( m.secondaryType_1 )+'`\n' : '';
-            //value += m.secondaryType_2.length > 0 ? '`'+m.secondaryValue_2+' '+modStat( m.secondaryType_2 )+'`\n' : '';
-            //value += m.secondaryType_3.length > 0 ? '`'+m.secondaryValue_3+' '+modStat( m.secondaryType_3 )+'`\n' : '';
-            //value += m.secondaryType_4.length > 0 ? '`'+m.secondaryValue_4+' '+modStat( m.secondaryType_4 )+'`\n' : '';
+            value += '**Secondary Stats**\n';
+            value += m.secondaryType_1.length > 0 ? '`'+m.secondaryValue_1+' '+modStat( m.secondaryType_1 )+'`\n' : '';
+            value += m.secondaryType_2.length > 0 ? '`'+m.secondaryValue_2+' '+modStat( m.secondaryType_2 )+'`\n' : '';
+            value += m.secondaryType_3.length > 0 ? '`'+m.secondaryValue_3+' '+modStat( m.secondaryType_3 )+'`\n' : '';
+            value += m.secondaryType_4.length > 0 ? '`'+m.secondaryValue_4+' '+modStat( m.secondaryType_4 )+'`\n' : '';
 
             value += '`------------------------------`\n';
             		

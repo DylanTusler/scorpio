@@ -42,7 +42,7 @@ module.exports = {
             /** Split message on spaces and remove the command part */
 		    let args = message.content.split(/\s+/g).slice(1);
 		    if( !args || !args[0] ) { 
-		        let error = new Error('Please provide an allycode or discord user'); 
+    	        let error = new Error('Please provide an allycode or discord user:\n```md\n<command> <user> [other criteria]\n<command> <allycode> [other criteria]```');
 		        error.code = 400;
 		        throw error;
 		    }

@@ -8,20 +8,29 @@ module.exports = async ( client, message ) => {
 		let { allycode, discordId } = await client.helpers.getId( message );
 
         let unitName = message.content.split(/\s/).slice(2).join(' ');
-        if( !unitName ) { throw new Error('No unit provided to stats'); }
+        if( !unitName ) { 
+	        let error = new Error('Please provide a unit:\n```md\n<command> <user> <unit>```');
+	        error.code = 400;
+	        throw error;
+        }
 
-        let unitIndex = await client.swapi.unitIndex('eng_us');            
-            unitIndex = unitIndex.units.filter(u => u.nameKey.toLowerCase().includes(unitName.toLowerCase()));
+        let unitIndex = await client.swapi.unitIndex(client.settings.swapi.language);            
+            unitIndex = unitIndex.units.filter(u => u.name.toLowerCase() === unitName.toLowerCase() || u.name.toLowerCase().includes(unitName.toLowerCase()));
+            unitIndex = unitIndex.filter(u => u.name.toLowerCase() === unitName.toLowerCase()).length > 0 ? unitIndex.filter(u => u.name.toLowerCase() === unitName.toLowerCase()) : unitIndex;
         
-        if( unitIndex.length === 0 ) { throw new Error('I could not match unit "'+unitName+'"'); }
+        if( unitIndex.length === 0 ) { 
+	        let error = new Error('I could not match unit "'+unitName+'"');
+	        error.code = 400;
+	        throw error;
+        }
 
         let calcMsg = 'I\'m looking up this guild, **please wait...**';
         retMessage = await message.reply(calcMsg);
 
 		/** Get player from swapi cacher */
 		let guild = allycode ? 
-			await client.swapi.guild(allycode, 'eng_us') :
-			await client.swapi.guild(discordId, 'eng_us');
+			await client.swapi.guild(allycode, client.settings.swapi.language) :
+			await client.swapi.guild(discordId, client.settings.swapi.language);
 
 		/** 
 		 * REPORT OR PROCEED WITH TO DO STUFF WITH GUILD OBJECT 

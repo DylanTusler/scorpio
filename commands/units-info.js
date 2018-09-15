@@ -6,7 +6,7 @@ module.exports = async ( client, message ) => {
 
 		/** Get player units from api */
 		let ids = [ allycodes ].concat([discordIds]);
-		let units = await client.swapi.units(ids, 'eng_us');
+		let units = await client.swapi.units(ids, client.settings.swapi.language);
 		
 		/** 
 		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 

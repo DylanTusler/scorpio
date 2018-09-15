@@ -21,6 +21,20 @@ module.exports = async ( client ) => {
 	    /**
 	     * Shut down
 	     */
+
+        const fs = require('fs');
+        if( fs.existsSync(client.folders.utilities+'swgohAPI') ) {
+            try {
+                let gbapiSettings = await require(client.folders.utilities+'swgohAPI/swgoh.settings.json');
+                gbapiSettings.user = await client.bgapi.currentUser();
+                await fs.writeFileSync(client.folders.utilities+'swgohAPI/swgoh.settings.json', JSON.stringify(gbapiSettings), 'utf8');
+	    	    console.log('Saved bgapi settings');
+            } catch(e) {    
+	        	errors.push('Could not save gbapi settings');
+	        	console.error(e);
+            }
+        }
+
 	    
 	    if( errors.length > 0 ) {
 	    	console.log(error.join('\n'));

@@ -44,6 +44,9 @@ client.shutDown = async () => {
 //ON READY
 client.on('ready', async () => {    
 	console.info(`Started successfully`);
+	client.user.setActivity(client.settings.prefix+'help', { type: 'LISTENING' })
+        .then(presence => console.log(`Activity set to ${presence.game ? presence.game.name : 'none'}`))
+        .catch(console.error);
 }); 
 
 //ON DISCONNECT

@@ -9,9 +9,10 @@
 		"YOUR_DISCORD_ID"
 	],
   	"swapi":{
-   		"database":"YOUR_MONGODB_CONNECTION_URL",
+   		"database":"mongodb://localhost:27017/",
   		"username":"YOUR_API.SWGOH.HELP_USERNAME",
-  		"password":"YOUR_API.SWGOH.HELP_PASSWORD"
+  		"password":"YOUR_API.SWGOH.HELP_PASSWORD",
+    	"language":"eng_us"
   	},
   	"commands":[
       	{
