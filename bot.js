@@ -102,9 +102,9 @@ client.on('message', async (message) => {
 	let command = null;
 	let log = { 
 	    date:new Date(), 
-	    user:message.author.tag,
-	    channel:message.channel.name,
-	    server:message.channel.guild.name
+	    user:message.author.tag || message.author.id,
+	    channel:message.channel.name || message.channel.id,
+	    server:message.channel.guild.name || ''
 	};
 	
 	try {

@@ -19,10 +19,19 @@ module.exports = async ( client, message ) => {
 		let embed = {};
 		embed.title = `${player.name} - ${player.allyCode}`;
 		embed.description = '`------------------------------`\n';
-		embed.description += 'Level: **'+player.level+'**\n';
-		embed.description += 'Guild: **'+player.guildName+'**\n';
-		embed.description += 'Total GP: **'+player.stats.filter(s => s.index === 1)[0].value.toLocaleString()+'**\n';
+		embed.description += '**Level** : `'+player.level+'`\n';
+		embed.description += '**Guild** : `'+player.guildName+'`\n';
+		embed.description += '**Total GP** : `'+player.stats.filter(s => s.index === 1)[0].value.toLocaleString()+'`\n';
+        embed.description += '**PVP Ship wins** : `'+player.stats.filter(s => s.index === 4)[0].value.toLocaleString()+'`\n';
+        embed.description += '**PVP Char wins** : `'+player.stats.filter(s => s.index === 5)[0].value.toLocaleString()+'`\n';
+        embed.description += '**PVE Battle wins** : `'+player.stats.filter(s => s.index === 6)[0].value.toLocaleString()+'`\n';
+        embed.description += '**Hard node wins** : `'+player.stats.filter(s => s.index === 7)[0].value.toLocaleString()+'`\n';
+        embed.description += '**Galactic war wins** : `'+player.stats.filter(s => s.index === 8)[0].value.toLocaleString()+'`\n';
+        embed.description += '**Guild raid wins** : `'+player.stats.filter(s => s.index === 9)[0].value.toLocaleString()+'`\n';
+        embed.description += '**Total guild contribution** : `'+player.stats.filter(s => s.index === 10)[0].value.toLocaleString()+'`\n';
+        embed.description += '**Total guild exchange donations** : `'+player.stats.filter(s => s.index === 11)[0].value.toLocaleString()+'`\n';
 
+        
         embed.fields = [];
         let value = null;
 
@@ -31,6 +40,9 @@ module.exports = async ( client, message ) => {
         
         value = '★★★★★★★: `'+characters.filter(u => u.rarity === 7).length+'`\n';
         value += '★★★★★★☆: `'+characters.filter(u => u.rarity === 6).length+'`\n';
+        value += '★★★★★☆☆: `'+characters.filter(u => u.rarity === 5).length+'`\n';
+        value += '★★★★☆☆☆: `'+characters.filter(u => u.rarity === 4).length+'`\n';
+        value += '★★★☆☆☆☆: `'+characters.filter(u => u.rarity === 3).length+'`\n';
         value += '**Arena rank**: `'+player.arena.char.rank+'`\n';
         value += '**Total zetas**: `'+characters.reduce((total,u) => parseInt(total) + parseInt(u.skills.filter(s => s.isZeta && s.tier === 8).length) || 0)+'`\n';
         value += '**Total mods**: `'+characters.reduce((total,u) => parseInt(total) + parseInt(u.mods.length) || 0)+'`\n';
@@ -52,7 +64,10 @@ module.exports = async ( client, message ) => {
         let ships = player.roster.filter(u => u.type === 'SHIP' || u.type === 2);
         
         value = '★★★★★★★: `'+ships.filter(u => u.rarity === 7).length+'`\n';
-        value += '★★★★★★☆: `'+characters.filter(u => u.rarity === 6).length+'`\n';
+        value += '★★★★★★☆: `'+ships.filter(u => u.rarity === 6).length+'`\n';
+        value += '★★★★★☆☆: `'+ships.filter(u => u.rarity === 5).length+'`\n';
+        value += '★★★★☆☆☆: `'+ships.filter(u => u.rarity === 4).length+'`\n';
+        value += '★★★☆☆☆☆: `'+ships.filter(u => u.rarity === 3).length+'`\n';
         value += '**Arena rank**: `'+player.arena.ship.rank+'`\n';
         value += '**Hardware Lvl 3**: `'+ships.reduce((total,u) => parseInt(total) + parseInt(u.skills.filter(s => s.id.startsWith("hardware") && s.tier === 3).length) || 0)+'`\n';
         value += '**Hardware Lvl 2**: `'+ships.reduce((total,u) => parseInt(total) + parseInt(u.skills.filter(s => s.id.startsWith("hardware") && s.tier === 2).length) || 0)+'`\n';

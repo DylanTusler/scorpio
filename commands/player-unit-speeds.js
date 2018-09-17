@@ -5,7 +5,8 @@ module.exports = async ( client, message ) => {
 
 	try {
 		
-		let { allycode, discordId } = await client.helpers.getId( message );
+		//Get allycode / discord ID from message
+		let { allycode, discordId, rest } = await client.helpers.getId( message );
 
 		/** Get player from swapi cacher */
 		let player = allycode ?

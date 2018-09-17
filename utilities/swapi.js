@@ -21,7 +21,8 @@ module.exports = (client) => {
 		squads:squads,
 		events:events,
 		
-		unitIndex:unitIndex
+		unitIndex:unitIndex,
+		skillIndex:skillIndex
 	};
 
 };
@@ -212,20 +213,15 @@ async function guild( id, language ) {
  *  @allycode
  *  @discordId
  */
-async function register( allycode, discordId ) {
+async function register( putArray ) {
 	try {
 
-		allycode  = allycode.toString().match(/^\d{9}$/) ? parseInt(allycode.toString().match(/\d{9}/)[0]) : null;
-		discordId = discordId.toString().match(/^\d{17,18}$/) ? discordId.toString().match(/^\d{17,18}$/)[0] : null;
-		
-		if( !allycode && !discordId ) { 
-			throw new Error('Please provide a valid allycode'); 
-		}
-
+        let getArray = putArray.map(a => a[0]);
+        
 		/** Get player from swapi cacher */
 		return await swgoh.fetchAPI('/registration', {
-			"put":[ [allycode,discordId] ],
-			"get":[ allycode ]
+			"put":putArray,
+			"get":getArray
 		});
 
 	} catch(e) {
@@ -375,7 +371,7 @@ async function events(language) {
 
 
 /**
- *  Fetch swgoh event schedule from cache, and sync if necessary
+ *  Fetch localized units index from cache, or sync if necessary
  * 
  */
 async function unitIndex(language) {
@@ -386,13 +382,13 @@ async function unitIndex(language) {
 	        expiredDate.setHours(expiredDate.getHours() - eventCooldown);
 		
 		/** Get units from cache */
-		let unitIndex = await cache.get('swapi', 'units', {language:language, updated:{ $gte:expiredDate.getTime() }});
+		let units = await cache.get('swapi', 'units', {language:language, updated:{ $gte:expiredDate.getTime() }});
 
 		/** Check if existance and expiration */
-		if( !unitIndex || !unitIndex[0] ) { 
+		if( !units || !units[0] ) { 
 		
 			/** If not found or expired, fetch new from API and save to cache */
-			unitIndex = {
+			units = {
 			    units:await swgoh.fetchData({
                     "collection": "unitsList",
                     "language": language,
@@ -405,23 +401,87 @@ async function unitIndex(language) {
                         "nameKey": 1,
                         "descKey": 1,
                         "forceAlignment": 1,
+                        "combatType": 1,
                         "categoryIdList": 1,
-                        "combatType": 1    
+                        "skillReferenceList": 1,
+                        "crewList": 1 
                     }
                 }),
 			    language:language,
 			    updated:(new Date()).getTime()
 			}
 			
-			if( !unitIndex.units ) { throw new Error('Error fetching units'); } 
+			if( !units.units ) { throw new Error('Error fetching units'); } 
 			
-			unitIndex = await cache.put('swapi', 'units', {language:language}, unitIndex);
+			units = await cache.put('swapi', 'units', {language:language}, units);
 
 		} else {		
-		    unitIndex = unitIndex[0];
+		    units = units[0];
 		}
 
-		return unitIndex;
+		return units;
+		
+	} catch(e) { 
+		throw e; 
+	}    		
+
+}
+
+
+/**
+ *  Fetch localized skills index from cache, or sync if necessary
+ * 
+ */
+async function skillIndex(language) {
+	
+	try {
+    	
+        let expiredDate = new Date();
+	        expiredDate.setHours(expiredDate.getHours() - eventCooldown);
+		
+		/** Get units from cache */
+		let skills = await cache.get('swapi', 'skills', {language:language, updated:{ $gte:expiredDate.getTime() }});
+
+		/** Check if existance and expiration */
+		if( !skills || !skills[0] ) { 
+		
+			/** If not found or expired, fetch new from API and save to cache */
+			skills = {
+			    skills:await swgoh.fetchData({
+                    "collection": "skillList",
+                    "language": "eng_us",
+                    "enums":true,
+                    "project": {
+                        "id":1, 
+                        "abilityReference":1,
+                        "isZeta":1
+                    }
+                }),
+                abilities:await swgoh.fetchData({
+                    "collection": "abilityList",
+                    "language": "eng_us",
+                    "enums":true,
+                    "project": {
+                        "id":1, 
+                        "type":1, 
+                        "nameKey":1,
+                        "descKey":1,
+                        "tierList":1
+                    }
+                }),
+                language:language,
+			    updated:(new Date()).getTime()
+			}
+			
+			if( !skills.skills && !skills.abilities  ) { throw new Error('Error fetching skills'); } 
+			
+			skills = await cache.put('swapi', 'skills', {language:language}, skills);
+
+		} else {		
+		    skills = skills[0];
+		}
+
+		return skills;
 		
 	} catch(e) { 
 		throw e; 
