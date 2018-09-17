@@ -5,11 +5,13 @@ module.exports = async ( client, message ) => {
 	
 	try {
 		
-		let { allycode, discordId } = await client.helpers.getId( message );
+		//Get allycode / discord ID from message
+		let { allycode, discordId, rest } = await client.helpers.getId( message );
 
-        let unitName = message.content.split(/\s/).slice(2).join(' ');
+        //Get unit name from message
+        let unitName = rest;
         if( !unitName ) { 
-	        let error = new Error('Please provide a unit:\n```md\n<command> <user> <unit>```');
+	        let error = new Error('Please provide a character:\n```md\n<command> <@user|allycode> <character>```');
 	        error.code = 400;
 	        throw error;
         }
@@ -19,18 +21,22 @@ module.exports = async ( client, message ) => {
 			await client.swapi.player(allycode, client.settings.swapi.language) :
 			await client.swapi.player(discordId, client.settings.swapi.language);
 
-        let unit = player.roster.filter(u => u.name.toLowerCase().includes(unitName.toLowerCase()));
-            unit = player.roster.filter(u => u.name.toLowerCase() === unitName.toLowerCase()).length > 0 ? player.roster.filter(u => u.name.toLowerCase() === unitName.toLowerCase()) : unit;
-       
-        if( unit.length === 0 ) { 
-	        let error = new Error('This player doesn\'t have a match for the unit requested');
+        if( !player ) { 
+	        let error = new Error('I could not find a player by this id or user');
 	        error.code = 400;
 	        throw error;
         }
 
-		/** 
-		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
-		 * */
+        let unit = player.roster.filter(u => u.type === 'CHARACTER' || u.type === 1);
+            unit = player.roster.filter(u => u.name.toLowerCase().includes(unitName.toLowerCase()));
+            unit = player.roster.filter(u => u.name.toLowerCase() === unitName.toLowerCase()).length > 0 ? player.roster.filter(u => u.name.toLowerCase() === unitName.toLowerCase()) : unit;
+       
+        if( unit.length === 0 ) { 
+	        let error = new Error('I could not match *character* "'+unitName+'"');
+	        error.code = 400;
+	        throw error;
+        }
+
 
 		let today = new Date();
 		
@@ -46,7 +52,7 @@ module.exports = async ( client, message ) => {
             let name = '';
 
             while( count < m.slot ) {
-                name = '__**'+modSlot(count)+'**__ : `';
+                name = '__**'+client.helpers.mods.slot(count)+'**__ : `';
                 embed.fields.push({
                     name:name+'none`',
                     value:'-\n-\n-\n`------------------------------`\n',
@@ -55,21 +61,21 @@ module.exports = async ( client, message ) => {
                 ++count;
             }
             
-            name = '__**'+modSlot(count)+'**__ : `';
-            name += modLevel( m.level, m.tier );
+            name = '__**'+client.helpers.mods.slot(count)+'**__ : `';
+            name += client.helpers.mods.level( m.level, m.tier );
             name += ' ['+'⚬'.repeat(m.pips)+'-'.repeat(6 - m.pips)+']`\n';
             
             value = '**Set** : ';
-            value += '`'+modSet( m.set )+'`\n';
+            value += '`'+client.helpers.mods.set( m.set )+'`\n';
             
             value += '**Primary Stat**\n';
-            value += '`'+m.primaryBonusValue+' '+modStat( m.primaryBonusType )+'`\n';
+            value += '`'+m.primaryBonusValue+' '+client.helpers.mods.stat( m.primaryBonusType )+'`\n';
 
             value += '**Secondary Stats**\n';
-            value += m.secondaryType_1.length > 0 ? '`'+m.secondaryValue_1+' '+modStat( m.secondaryType_1 )+'`\n' : '';
-            value += m.secondaryType_2.length > 0 ? '`'+m.secondaryValue_2+' '+modStat( m.secondaryType_2 )+'`\n' : '';
-            value += m.secondaryType_3.length > 0 ? '`'+m.secondaryValue_3+' '+modStat( m.secondaryType_3 )+'`\n' : '';
-            value += m.secondaryType_4.length > 0 ? '`'+m.secondaryValue_4+' '+modStat( m.secondaryType_4 )+'`\n' : '';
+            value += m.secondaryType_1.length > 0 ? '`'+m.secondaryValue_1+' '+client.helpers.mods.stat( m.secondaryType_1 )+'`\n' : '';
+            value += m.secondaryType_2.length > 0 ? '`'+m.secondaryValue_2+' '+client.helpers.mods.stat( m.secondaryType_2 )+'`\n' : '';
+            value += m.secondaryType_3.length > 0 ? '`'+m.secondaryValue_3+' '+client.helpers.mods.stat( m.secondaryType_3 )+'`\n' : '';
+            value += m.secondaryType_4.length > 0 ? '`'+m.secondaryValue_4+' '+client.helpers.mods.stat( m.secondaryType_4 )+'`\n' : '';
 
             value += '`------------------------------`\n';
             		

@@ -5,7 +5,11 @@ module.exports = async ( client, message ) => {
 
 	try {
 		
-		let { allycode, discordId } = await client.helpers.getId( message );
+		//Get allycode / discord ID from message
+		let { allycode, discordId, rest } = await client.helpers.getId( message );
+
+        //Get criteria name from message
+        let criteria = rest;
 
 		/** Get player from swapi cacher */
 		let player = allycode ?
@@ -19,8 +23,9 @@ module.exports = async ( client, message ) => {
 		let today = new Date();
 		let age = client.helpers.convertMS(today - new Date(player.updated));
 		
+        let lim = 10;
 		let embed = {};
-		embed.title = `${player.name} - Next 20 best Zetas`;
+		embed.title = `${player.name} - Next ${lim} best Zetas`;
 		embed.description = '`------------------------------`\n';
 			
 	    let availableZetas = [];
@@ -49,7 +54,6 @@ module.exports = async ( client, message ) => {
         });
         
         
-        let lim = 20;
         for( let az of availableZetas ) {
             if( lim === 0 ) { break; }
             

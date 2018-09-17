@@ -20,7 +20,9 @@ module.exports = async ( client, message ) => {
 		}
 		
 		
-		let register = await client.swapi.register(allycodes[0], discordIds[0]);
+		let register = await client.swapi.register([
+		    [allycodes[0], discordIds[0]]
+		]);
 		
 		let today = new Date();
 		
