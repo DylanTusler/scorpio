@@ -4,7 +4,7 @@ module.exports = async ( client, message ) => {
 		
 		let { allycode, discordId, rest } = await client.helpers.getId( message );
         if( !rest ) {
-            let error = new Error('Please specify a report and optionally, language\n```md\n<command> [user] <report> [language]```\n```\nReports  : mods, player, units, guild, guildUnits, guildRoster\nLanguages: chs_cn, cht_cn, eng_us, fre_fr, ger_de, ind_id, ita_it, jpn_jp, kor_kr, por_br, rus_ru, spa_xm, tha_th, tur_tr```\n');
+            let error = new Error('Please specify a report and optionally, language\n\n```md\n<command> [user] <report> [language]\n\nReports  : mods, player, units, guild, guildUnits, guildRoster\n\nLanguages: chs_cn, cht_cn, eng_us, fre_fr, ger_de, ind_id, ita_it, jpn_jp, kor_kr, por_br, rus_ru, spa_xm, tha_th, tur_tr\n``` \n');
             error.code = 400;
             throw error;            
         }
@@ -30,6 +30,7 @@ module.exports = async ( client, message ) => {
 		embed.description = '`------------------------------`\n';
 		embed.description += '✦ ['+report.charAt(0).toUpperCase()+report.slice(1)+':'+allycode+'](https://script.google.com/macros/s/AKfycbySlzQ6o0V_dvWQxMZj-p4lAbiqJ4jYKgxkRwZAY05NaMfrAMw/exec?report='+report+'&allycode='+allycode+'&language='+language+'&enums=true)\n';
 		embed.description += '`------------------------------`\n';
+		embed.description += 'For a more stable source, \n[setup your own private data pipe](https://docs.google.com/spreadsheets/d/1lxRBR4d9bWKWGmnhkjYiZ5EMkFogtaCR-qN22D_DGsw/copy)';
 
 		embed.color = 0x936EBB;
 		embed.timestamp = today;

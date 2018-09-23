@@ -3,8 +3,8 @@ module.exports = (client) => {
 	playerCooldown = client.settings.playerCooldown || 2;
 	guildCooldown  = client.settings.guildCooldown  || 6;
 	eventCooldown  = client.settings.squadCooldown  || 6;
-	zetasCooldown  = client.settings.zetasCooldown  || 24*7;
-	squadCooldown  = client.settings.squadCooldown  || 24*7;
+	zetasCooldown  = client.settings.zetasCooldown  || 24*3;
+	squadCooldown  = client.settings.squadCooldown  || 24*3;
 	
 	swgoh = client.swgoh;
 	cache = client.cache;
@@ -16,16 +16,58 @@ module.exports = (client) => {
 		player:player,
 		guild:guild,
 		register:register,
+		unregister:unregister,
 		whois:whois,
 		zetas:zetas,
 		squads:squads,
 		events:events,
+		
+		imageUrl:imageUrl,
 		
 		unitIndex:unitIndex,
 		skillIndex:skillIndex
 	};
 
 };
+
+
+function imageUrl( type, params ) {
+	    
+    let url = "https://api.swgoh.help/image";
+    
+    params = params || {};
+            
+    switch( type ) {
+        case "gear":        
+            url += "/gear/"+(params.id || '');
+            break;
+        case "mods":        
+            url += "/mods/"+(params.id || '');
+            break;
+        case "ship":
+            url += "/ship/"+(params.id || '');
+            break;
+        case "char":        
+        case "author":
+        default:
+            url += "/char/"+(params.id || '');
+            break;
+            
+    }
+
+//    if( Object.keys(params).length > 1 ) { url += "?bg=35383e" };
+    url += "?bg=000";
+    
+    url += params.level  ? "&level="+params.level    : '';
+    url += params.gear   ? "&gear="+params.gear      : '';
+    url += params.rarity ? "&rarity="+params.rarity  : '';
+    url += params.zetas  ? "&zetas="+params.zetas    : '';
+    url += params.hardware  ? "&hw="+params.hardware : '';
+    url += params.pilots  ? "&pilots="+params.polits : '';
+    
+    return url;
+
+}
 
 
 /**
@@ -138,10 +180,10 @@ async function player( id, language ) {
 		/** Get player from cache */
 		let player = allycode ?
 			await cache.get('swapi', 'players', {allyCode:allycode, updated:{ $gte:expiredDate.getTime() }}) :
-			await cache.get('swapi', 'players', {discordId:discordId, updated:{ $gte:expiredDate.getTime() }});
+			null; //await cache.get('swapi', 'players', {discordId:discordId, updated:{ $gte:expiredDate.getTime() }});
 
 		/** Check if existance and expiration */
-		if( !player || !player[0] ) { 
+		if( !player || player.length === 0 ) { 
 		
 			/** If not found or expired, fetch new from API and save to cache */
 			player = allycode ? 
@@ -152,8 +194,10 @@ async function player( id, language ) {
 				throw new Error('No player found'); 
 			} 
 			
-			if( discordId ) { player[0].discordId = discordId; }
-			player = await cache.put('swapi', 'players', {allyCode:player[0].allyCode}, player[0]);
+			//if( discordId ) { player[0].discordId = discordId; }
+			for( let p of player ) {
+			    p = await cache.put('swapi', 'players', {allyCode:p.allyCode}, p);
+			}
 		} 
 
         return Array.isArray(player) ? player[0] : player;
@@ -222,6 +266,27 @@ async function register( putArray ) {
 		return await swgoh.fetchAPI('/registration', {
 			"put":putArray,
 			"get":getArray
+		});
+
+	} catch(e) {
+		throw e;
+	}	
+}
+
+
+/**
+ *  Remove a player from api registration, by allycode or discordId
+ * 
+ *  Params
+ *  @allycode
+ *  @discordId
+ */
+async function unregister( remArray ) {
+	try {
+
+		/** Get player from swapi cacher */
+		return await swgoh.fetchAPI('/registration', {
+			"del":remArray
 		});
 
 	} catch(e) {

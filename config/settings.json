@@ -14,36 +14,47 @@
   		"password":"YOUR_API.SWGOH.HELP_PASSWORD",
     	"language":"eng_us"
   	},
-  	"commands":[
-      	{
+  	"commands":{
+      	"help":{
 		    "help":"this-help-menu.js",
 		    "invite":"invite-this-bot.js",
 		    "swgoh":"swgoh-bots-and-tools.js",
 		    "discord":"swgoh-related-discords.js",
-		    "support":"support-me-on-patreon.js"
+		    "support":"support-me-on-patreon.js",
+            "translate":"google-translate.js"
 		},
-        {
-		    "player":"player-info.js",
-		    "pu":"player-unit-stats.js",
-		    "po":"player-unit-offense.js",
-		    "ps":"player-unit-speeds.js",
-		    "pz":"player-zetas-acquired.js",
-		    "zeta":"next-zeta-recommendations.js"
-        },
-        {
-		    "guild":"guild-info.js",
-		    "gu":"guild-info-by-unit.js"
-        },
-		{
+		"other":{
 		    "add":"register-your-allycode.js",
+		    "rem":"unregister-an-allycode.js",
 		    "whois":"whois-allycode-or-discord-user.js",
-		    "events":"event-schedule.js"
-      	}
-  	],
+		    "events":"event-schedule.js",
+		    "raw":"raw-data-stream.js"
+		},
+        "player-commands":{
+		    "player":"player-info.js",
+		    "pm":"player-character-mods.js",
+		    "pc":"player-character-stats.js",
+		    "ps":"player-ship-stats.js",
+		    "pa":"player-arena-info.js",
+		    "pz":"player-zetas-acquired.js",
+		    "zeta":"next-zeta-recommendations.js",
+		    "speed":"player-unit-speeds.js",
+		    "offense":"player-unit-offense.js"		    
+        },
+        "guild-commands":{
+		    "guild":"guild-info.js",
+		    "gspeed":"guild-speed-by-character.js",
+		    "gc":"guild-info-by-character.js",
+            "gs":"guild-info-by-ship.js"
+        },
+		"hidden":{
+		    "h":"swgoh-help-me.js"		
+		}
+  	},
 	"logDB":"botLogs",
 	"playerCooldown":2,
 	"guildCooldown":6,
 	"eventCooldown":6,
-	"zetasCooldown":168,
-	"squadCooldown":168
+	"zetasCooldown":80,
+	"squadCooldown":80
 }

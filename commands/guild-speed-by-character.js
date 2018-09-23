@@ -51,10 +51,14 @@ module.exports = async ( client, message ) => {
 		let age = client.helpers.convertMS(today - new Date(guild.updated));
 		
 		embed.title = guild.name;
-		embed.description = '__**'+unitIndex[0].nameKey+'**__\n';
 
-        calcMsg = '`------------------------------`\nGuild found!\nCalculating roster, **please wait...**';
-        embed.description += calcMsg;
+        embed.author = {
+            name:unitIndex[0].nameKey,
+            icon_url:client.swapi.imageUrl('author',{id:unitIndex[0].baseId})
+        }
+         
+        calcMsg = '`-------------------------`\nGuild found!\nCalculating roster, **please wait...**';
+        embed.description = calcMsg;
         await retMessage.edit({embed});
         embed.description = embed.description.replace(calcMsg,'');
         
@@ -74,7 +78,7 @@ module.exports = async ( client, message ) => {
 		embed.description = '__**'+unitIndex[0].nameKey+'**__\n';
 		
 		if( searchUnit.length > 0 ) {
-            embed.description += '`------------------------------`\n';
+            embed.description += '`-------------------------`\n';
             embed.description += '**Guild search found** : `'+searchUnit.length+' units` \n';
             embed.description += '**★★★★★★★** : `'+searchUnit.filter(t => t.starLevel === 7).length+'` \n';
             embed.description += '**★★★★★★☆** : `'+searchUnit.filter(t => t.starLevel === 6).length+'` \n';
@@ -91,7 +95,7 @@ module.exports = async ( client, message ) => {
             embed.description += '**XII** : `'+searchUnit.filter(t => t.gearLevel === 12).length+'` \n';
             embed.description += '**XI** : `'+searchUnit.filter(t => t.gearLevel === 11).length+'` \n';
             embed.description += '**X** : `'+searchUnit.filter(t => t.gearLevel === 10).length+'` \n';
-            embed.description += '`------------------------------`\n'
+            embed.description += '`-------------------------`\n'
 
             let payload = {};
                 payload[unitIndex[0].baseId] = searchUnit;
@@ -115,7 +119,7 @@ module.exports = async ( client, message ) => {
                     ++count;
                     value += '`'+Math.floor(ps.stats.final.Speed || 0)+' (+'+Math.floor(ps.stats.mods.Speed || 0)+')` : '+ps.unit.player+'\n';
                     if( count >= 25 ) {
-                        value += '`------------------------------`\n'
+                        value += '`-------------------------`\n'
                         embed.fields.push({
                             name:fname,
                             value:value,
@@ -128,7 +132,7 @@ module.exports = async ( client, message ) => {
                 }
                 
                 if( count > 0 ) {
-                    value += '`------------------------------`\n'
+                    value += '`-------------------------`\n'
                     embed.fields.push({
                         name:fname,
                         value:value,

@@ -19,7 +19,7 @@ module.exports = async ( client, message ) => {
 		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
 		 * */
 
-        let lim = 25;
+        let lim = 15;
 		let today = new Date();
 		
 		embed.title = player.name+' : Top '+lim+' units : Offense';

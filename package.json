@@ -6,7 +6,9 @@
   "dependencies": {
     "api-swgoh-help": "^3.0.9",
     "discord.js": "^11.3.2",
-    "mongodb": "^3.1.6"
+    "google-translate-api": "^2.3.0",
+    "mongodb": "^3.1.6",
+    "webshot": "^0.18.0"
   },
   "repository": {
     "type": "git",

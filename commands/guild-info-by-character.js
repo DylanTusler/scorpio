@@ -51,18 +51,23 @@ module.exports = async ( client, message ) => {
 		let age = client.helpers.convertMS(today - new Date(guild.updated));
 		
 		embed.title = guild.name;
-		embed.description = '__**'+unitIndex[0].nameKey+'**__\n';
+        embed.author = {
+            name:unitIndex[0].nameKey,
+            icon_url:client.swapi.imageUrl('char',{id:unitIndex[0].baseId})
+        }
 
-        calcMsg = '`------------------------------`\nGuild found!\nCalculating roster, **please wait...**';
-        embed.description += calcMsg;
+        calcMsg = '`-------------------------`\nGuild found!\nCalculating roster, **please wait...**';
+        embed.description = calcMsg;
         await retMessage.edit({embed});
         embed.description = embed.description.replace(calcMsg,'');
         
 
-        let allycodes = guild.roster.map(p => p.allyCode);
-        let units = await client.swapi.units( allycodes );
-        
-        if( !units || Object.keys(units).length === 0 ) { 
+        let players = [];
+        for( let p of guild.roster ) {
+            players.push(await client.swapi.player( p.allyCode ));
+        }
+
+        if( !players || players.length === 0 ) { 
 	        let error = new Error('Error fetching guild units');
 	        error.code = 400;
 	        throw error;
@@ -70,44 +75,51 @@ module.exports = async ( client, message ) => {
         
         embed.fields = [];
         
-        let searchUnit = units[unitIndex[0].baseId] || [];
-		embed.description = '__**'+unitIndex[0].nameKey+'**__\n';
-		
-        embed.description += '`------------------------------`\n';
+        let searchUnit = players.map(p => {
+            let newp = p.roster.filter(r => r.defId === unitIndex[0].baseId);
+            if( newp.length === 0 ) { return null; }
+
+            newp = newp[0];
+            newp.player = p.name;
+            return newp;
+        });
+        searchUnit = await searchUnit.filter(su => su);
+        
+        embed.description += '`-------------------------`\n';
         embed.description += '**Guild search found** : `'+searchUnit.length+' units` \n';
 
 		if( searchUnit.length > 0 ) {
-            
-            let zz = searchUnit.filter(t => t.zetas.length === 3).length;
+
+            let zz = searchUnit.filter(t => t && t.skills.filter(s => s.isZeta && s.tier === 8).length === 3).length;
             embed.description += zz > 0 ? '**Zeta ✦✦✦** : `'+zz+'` \n' : '';
 
-            zz = searchUnit.filter(t => t.zetas.length === 2).length;
+            zz = searchUnit.filter(t => t && t.skills.filter(s => s.isZeta && s.tier === 8).length === 2).length;
             embed.description += zz > 0 ? '**Zeta ✦✦** : `'+zz+'` \n' : '';
 
-            zz = searchUnit.filter(t => t.zetas.length === 1).length;
+            zz = searchUnit.filter(t => t && t.skills.filter(s => s.isZeta && s.tier === 8).length === 1).length;
             embed.description += zz > 0 ? '**Zeta ✦** : `'+zz+'` \n' : '';
 
-            embed.description += '**Gear XII** : `'+searchUnit.filter(t => t.gearLevel === 12).length+'` \n';
-            embed.description += '**Gear XI** : `'+searchUnit.filter(t => t.gearLevel === 11).length+'` \n';
-            embed.description += '**Gear X** : `'+searchUnit.filter(t => t.gearLevel === 10).length+'` \n';
-            embed.description += '`------------------------------`\n'
+            embed.description += '**Gear XII** : `'+searchUnit.filter(t => t && t.gear === 12).length+'` \n';
+            embed.description += '**Gear XI** : `'+searchUnit.filter(t => t && t.gear === 11).length+'` \n';
+            embed.description += '**Gear X** : `'+searchUnit.filter(t => t && t.gear === 10).length+'` \n';
+            embed.description += '`-------------------------`\n'
 
             embed.fields = [];
             searchUnit.sort((a,b) => b.gp - a.gp);
                 
-            for( let i = 7; i >= 3; --i ) {            
-                let unitList = searchUnit.filter(t => t.starLevel === i);
+            for( let i = 7; i > 0; --i ) {
+                let unitList = searchUnit.filter(t => t.rarity === i);
                 let gpList = unitList.map(u => '`'+u.gp.toLocaleString()+'` : '+u.player);
                 if( unitList.length === 0 ) { continue; }
                 embed.fields.push({
                     name:"★".repeat(i)+"☆".repeat(7-i)+" ("+unitList.length+")",
-                    value:gpList.slice(0,25).join('\n')+'\n`------------------------------`\n',
+                    value:gpList.slice(0,25).join('\n')+'\n`-------------------------`\n',
                     inline:true
                 });
                 if( unitList.length > 25 ) {
                     embed.fields.push({
                         name:"...",
-                        value:gpList.slice(26,50).join('\n')+'\n`------------------------------`\n',
+                        value:gpList.slice(25,50).join('\n')+'\n`-------------------------`\n',
                         inline:true
                     });
                 }

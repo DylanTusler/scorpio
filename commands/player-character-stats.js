@@ -37,13 +37,15 @@ module.exports = async ( client, message ) => {
             throw error;
         }
 
+        
+        
 
 		let today = new Date();
 		
-		embed.title = `${player.name} - ${unit.name}`;
+		embed.title = `${player.name} - ${player.allyCode}`;
         embed.description = '**L'+unit.level+'** | **G'+unit.gear+'** | '+'★'.repeat(unit.rarity)+'☆'.repeat(7-unit.rarity)+'\n';
 		embed.description += '**GP** : `'+unit.gp.toLocaleString()+'`\n';
-		embed.description += '`------------------------------`\n';
+		embed.description += '`-------------------------`\n';
 		
 		unit.skills.sort((a,b) => parseInt(a.id.charAt(0) - b.id.charAt(0)));
 		
@@ -52,6 +54,7 @@ module.exports = async ( client, message ) => {
 		    
 		let skillIndex = await client.swapi.skillIndex(client.settings.language);
 		
+		let zetaCount = null;
         for( let sr of unitIndex.skillReferenceList ) {
             
             let iskill = skillIndex.skills.filter(s => s.id === sr.skillId)[0];
@@ -65,6 +68,9 @@ module.exports = async ( client, message ) => {
             if( iskill.isZeta ) {
                 embed.description += sk.length > 0 && sk[0].tier === 8 ? '**✦** ' : '';
                 embed.description += sk.length === 0 || sk[0].tier < 8 ? '⟡ ' : '';
+
+                zetaCount = zetaCount || 0;
+                zetaCount += sk.length > 0 && sk[0].tier === 8 ? 1 : 0;
             } else {
                 if( iability.tierList.length >= 7 ) {
                     embed.description += sk.length > 0 && sk[0].tier === 8 ? '`⭓` ' : '';
@@ -75,10 +81,11 @@ module.exports = async ( client, message ) => {
             }
 
             embed.description += '**'+stype+'** : ';
-            embed.description += '`'+(sk.length > 0 ? sk[0].tier : 1)+'` : `'+iability.nameKey+'`\n';
+            embed.description += '`'+(sk.length > 0 ? sk[0].tier : 1)+'` \n';
+            embed.description += '`'+iability.nameKey+'` \n';
         }        
 
-        embed.description += '`------------------------------`\n';
+        embed.description += '`-------------------------`\n';
 
         for( let s in stats.stats.final ) {
            if( s === 'None' ) { continue; }
@@ -86,7 +93,7 @@ module.exports = async ( client, message ) => {
            embed.description += stats.stats.mods[s] ? ' (+'+( stats.stats.mods[s] % 1 === 0 ? stats.stats.mods[s] : (stats.stats.mods[s] * 100).toFixed(2)+'%' )+')`\n' : '`\n';
         }
 
-		embed.description += '`------------------------------`\n';
+        embed.description += '`-------------------------`\n';
 
         embed.fields = [];
         
@@ -100,7 +107,7 @@ module.exports = async ( client, message ) => {
                 name = '__**'+client.helpers.mods.slot(count)+'**__ : `';
                 embed.fields.push({
                     name:name+'none`',
-                    value:'-\n-\n-\n`------------------------------`\n',
+                    value:'-\n-\n-\n`-------------------------`\n',
                     inline:true
                 });
                 ++count;
@@ -122,7 +129,7 @@ module.exports = async ( client, message ) => {
             //value += m.secondaryType_3.length > 0 ? '`'+m.secondaryValue_3+' '+client.helpers.mods.stat( m.secondaryType_3 )+'`\n' : '';
             //value += m.secondaryType_4.length > 0 ? '`'+m.secondaryValue_4+' '+client.helpers.mods.stat( m.secondaryType_4 )+'`\n' : '';
 
-            value += '`------------------------------`\n';
+            value += '`-------------------------`\n';
             		
             embed.fields.push({
                 name:name,
@@ -134,7 +141,20 @@ module.exports = async ( client, message ) => {
         
 		embed.color = 0x936EBB;
 		embed.timestamp = today;
-
+        embed.author = {
+            name:unit.name,
+            icon_url:client.swapi.imageUrl('author',{id:unit.defId})
+        }
+        embed.thumbnail = {
+            url:client.swapi.imageUrl('char', {
+                id:unit.defId, 
+                rarity:unit.rarity,
+                level:unit.level,
+                gear:unit.gear,
+                zetas:zetaCount 
+            })
+        }
+        
 		message.channel.send({embed});
 		
 	} catch(e) {

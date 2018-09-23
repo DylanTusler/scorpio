@@ -40,7 +40,7 @@ module.exports = async ( client, message ) => {
 
         for( let us of speeds ) {
             if( lim === 0 ) break;
-            embed.description += '`'+Math.floor(us.speed)+' (+'+Math.floor(us.bonus)+')` : '+us.unit+'\n';
+            embed.description += '`'+Math.floor(us.speed)+' (+'+Math.floor(us.bonus || 0)+')` : '+us.unit+'\n';
             --lim;       
         }
 

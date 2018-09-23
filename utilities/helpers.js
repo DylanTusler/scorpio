@@ -261,8 +261,30 @@ module.exports = {
 	},
 	
 	replyWithError: async ( message, error ) => {
-		message.react('⛔');
+	    if( await message.channel.permissionsFor(await message.guild.me).has('ADD_REACTIONS') ) {
+	        message.react('⛔');
+	    }
 		return await message.reply(error.message);
+	},
+	
+	checkClientPermissions: async ( client, message ) => {
+	    try {
+	        if( message.channel.type !== 'dm' ) {
+	            if( !await message.channel.permissionsFor(await message.guild.me).has('ADD_REACTIONS') ) {
+		            let error = new Error('Sorry, I need permission to add reactions first'); 
+		            error.code = 400;
+		            throw error;	            
+	            }
+	            if( !await message.channel.permissionsFor(await message.guild.me).has('EMBED_LINKS') ) {
+		            let error = new Error('Sorry, I need permission to embed links first'); 
+		            error.code = 400;
+		            throw error;	            
+	            }
+	        }
+	        return;
+	    } catch(e) {
+	        throw e;
+	    }
 	}
-
+	
 }

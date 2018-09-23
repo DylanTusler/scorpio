@@ -20,7 +20,7 @@ module.exports = async ( client, message ) => {
 		embed.title = `${player.name} - ${player.allyCode}`;
 		embed.description = '`------------------------------`\n';
 		embed.description += '**Level** : `'+player.level+'`\n';
-		embed.description += '**Guild** : `'+player.guildName+'`\n';
+		embed.description += player.guildName ? '**Guild** : `'+player.guildName+'`\n' : '**Guild** : `none`\n';
 		embed.description += '**Total GP** : `'+player.stats.filter(s => s.index === 1)[0].value.toLocaleString()+'`\n';
         embed.description += '**PVP Ship wins** : `'+player.stats.filter(s => s.index === 4)[0].value.toLocaleString()+'`\n';
         embed.description += '**PVP Char wins** : `'+player.stats.filter(s => s.index === 5)[0].value.toLocaleString()+'`\n';
@@ -43,9 +43,9 @@ module.exports = async ( client, message ) => {
         value += '★★★★★☆☆: `'+characters.filter(u => u.rarity === 5).length+'`\n';
         value += '★★★★☆☆☆: `'+characters.filter(u => u.rarity === 4).length+'`\n';
         value += '★★★☆☆☆☆: `'+characters.filter(u => u.rarity === 3).length+'`\n';
-        value += '**Arena rank**: `'+player.arena.char.rank+'`\n';
-        value += '**Total zetas**: `'+characters.reduce((total,u) => parseInt(total) + parseInt(u.skills.filter(s => s.isZeta && s.tier === 8).length) || 0)+'`\n';
-        value += '**Total mods**: `'+characters.reduce((total,u) => parseInt(total) + parseInt(u.mods.length) || 0)+'`\n';
+        value += '**Arena rank**: `'+(player.arena.char.rank || 'none')+'`\n';
+        value += '**Total zetas**: `'+characters.reduce((total,u) => parseInt(total) + parseInt(u.skills.filter(s => s.isZeta && s.tier === 8).length) || 0, 0)+'`\n';
+        value += '**Total mods**: `'+characters.reduce((total,u) => parseInt(total) + parseInt(u.mods.length) || 0, 0)+'`\n';
         value += '**Level 85**: `'+characters.filter(u => u.level === 85).length+'`\n';
         value += '**GP**: `'+player.stats.filter(s => s.index === 2)[0].value.toLocaleString()+'`\n';
         value += '**XII+**: `'+characters.filter(u => u.gear === 12 && u.equipped.length >= 3).length+'`\n';
@@ -68,9 +68,9 @@ module.exports = async ( client, message ) => {
         value += '★★★★★☆☆: `'+ships.filter(u => u.rarity === 5).length+'`\n';
         value += '★★★★☆☆☆: `'+ships.filter(u => u.rarity === 4).length+'`\n';
         value += '★★★☆☆☆☆: `'+ships.filter(u => u.rarity === 3).length+'`\n';
-        value += '**Arena rank**: `'+player.arena.ship.rank+'`\n';
-        value += '**Hardware Lvl 3**: `'+ships.reduce((total,u) => parseInt(total) + parseInt(u.skills.filter(s => s.id.startsWith("hardware") && s.tier === 3).length) || 0)+'`\n';
-        value += '**Hardware Lvl 2**: `'+ships.reduce((total,u) => parseInt(total) + parseInt(u.skills.filter(s => s.id.startsWith("hardware") && s.tier === 2).length) || 0)+'`\n';
+        value += '**Arena rank**: `'+(player.arena.ship.rank || 'none')+'`\n';
+        value += '**Hardware Lvl 3**: `'+ships.reduce((total,u) => parseInt(total) + parseInt(u.skills.filter(s => s.id.startsWith("hardware") && s.tier === 3).length) || 0, 0)+'`\n';
+        value += '**Hardware Lvl 2**: `'+ships.reduce((total,u) => parseInt(total) + parseInt(u.skills.filter(s => s.id.startsWith("hardware") && s.tier === 2).length) || 0, 0)+'`\n';
         value += '**Level 85**: `'+ships.filter(u => u.level === 85).length+'`\n';
         value += '**GP**: `'+player.stats.filter(s => s.index === 3)[0].value.toLocaleString()+'`\n';
         value += '`------------------------------`\n';

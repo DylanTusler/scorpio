@@ -7,7 +7,8 @@ client.folders = {
 	root:__dirname,
 	config:__dirname+'/config/',
 	utilities:__dirname+'/utilities/',
-	commands:__dirname+'/commands/'
+	commands:__dirname+'/commands/',
+	tmp:__dirname+'/tmp/'	
 }
 
 
@@ -104,7 +105,7 @@ client.on('message', async (message) => {
 	    date:new Date(), 
 	    user:message.author.tag || message.author.id,
 	    channel:message.channel.name || message.channel.id,
-	    server:message.channel.guild.name || ''
+	    server:message.channel.guild ? message.channel.guild.name : ''
 	};
 	
 	try {
@@ -119,14 +120,18 @@ client.on('message', async (message) => {
 		log.command = command;
 		
 		//Do command
+		await client.helpers.checkClientPermissions( client, message );
+		
 		await message.react('🤔');
-		await client.log.success(log);
-		await require(client.folders.commands+client.settings.commandsMap[command])( client, message );
+	    await require(client.folders.commands+client.settings.commandsMap[command])( client, message );
+	    await client.log.success(log);
 			
 	} catch(e) {
-		console.error(e);
 		let { logId, result } = await client.log.fail(log);
-		e.message += "\n[See logId: "+logId+"]\n";
+		if( e.code !== 400 ) {
+    	    console.error(e);
+			e.message += "\n[See logId: "+logId+"]\n";
+        }
 		await client.helpers.replyWithError( message, e );
 	}	
 	

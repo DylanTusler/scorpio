@@ -6,8 +6,8 @@ module.exports = async ( client ) => {
 		client.settings = require(client.folders.config+( process.argv[2] || 'settings' )+'.json');
         client.settings.commandsMap = {};
         
-        for( let c of client.settings.commands ) {
-    		client.settings.commandsMap = Object.assign(client.settings.commandsMap, c);
+        for( let c in client.settings.commands ) {
+    		client.settings.commandsMap = Object.assign(client.settings.commandsMap, client.settings.commands[c]);
     	}
 		
 		/** INIT CLIENT HELPERS */

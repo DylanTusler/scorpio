@@ -40,8 +40,10 @@ module.exports = async ( client, message ) => {
 
 		let today = new Date();
 		
-		embed.title = `${player.name} - ${unit[0].name}`;
-		embed.description = '`------------------------------`\n';
+		embed.title = `${player.name} - ${player.allyCode}`;
+		embed.description = '**L'+unit[0].level+'** | **G'+unit[0].gear+'** | '+'★'.repeat(unit[0].rarity)+'☆'.repeat(7-unit[0].rarity)+'\n';
+		embed.description += '**GP** : `'+unit[0].gp.toLocaleString()+'`\n';
+		embed.description = '`-------------------------`\n';
 
         embed.fields = [];
         
@@ -55,7 +57,7 @@ module.exports = async ( client, message ) => {
                 name = '__**'+client.helpers.mods.slot(count)+'**__ : `';
                 embed.fields.push({
                     name:name+'none`',
-                    value:'-\n-\n-\n`------------------------------`\n',
+                    value:'-\n-\n-\n`-------------------------`\n',
                     inline:true
                 });
                 ++count;
@@ -77,7 +79,7 @@ module.exports = async ( client, message ) => {
             value += m.secondaryType_3.length > 0 ? '`'+m.secondaryValue_3+' '+client.helpers.mods.stat( m.secondaryType_3 )+'`\n' : '';
             value += m.secondaryType_4.length > 0 ? '`'+m.secondaryValue_4+' '+client.helpers.mods.stat( m.secondaryType_4 )+'`\n' : '';
 
-            value += '`------------------------------`\n';
+            value += '`-------------------------`\n';
             		
             embed.fields.push({
                 name:name,
@@ -86,9 +88,31 @@ module.exports = async ( client, message ) => {
             });
             ++count;
         }        
-        
+
 		embed.color = 0x936EBB;
 		embed.timestamp = today;
+        
+        let zetaCount = null;
+        for( let sr of unit[0].skills ) {
+            if( sr.isZeta ) {
+                zetaCount = zetaCount || 0;
+                zetaCount += sr.tier === 8 ? 1 : 0;
+            }
+        }   
+        
+        embed.author = {
+            name:unit[0].name,
+            icon_url:client.swapi.imageUrl('author',{id:unit[0].defId})
+        }
+        embed.thumbnail = {
+            url:client.swapi.imageUrl('char', {
+                id:unit[0].defId, 
+                rarity:unit[0].rarity,
+                level:unit[0].level,
+                gear:unit[0].gear,
+                zetas:zetaCount 
+            })
+        }
 
 		message.channel.send({embed});
 		

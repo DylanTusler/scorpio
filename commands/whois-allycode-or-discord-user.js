@@ -2,6 +2,7 @@ module.exports = async ( client, message ) => {
 	
 	let description = '';
 	let retMessage = null;
+	let embed = {};
 	
 	try {
 		
@@ -13,6 +14,11 @@ module.exports = async ( client, message ) => {
 	        throw error;
 		}
 		
+		embed.title = "Whois";
+		embed.description = "Looking up: "+args.join(', ')+"\nPlease wait...";
+		retMessage = await message.channel.send({embed});
+		embed.description = '';
+		
 		let ids = [];
 		for( let i of args ) {
 		    if( i === 'me' ) { ids.push(message.author.id); }
@@ -23,19 +29,23 @@ module.exports = async ( client, message ) => {
 		/** Register player through swapi */
 		let register = await client.swapi.whois(ids);
 		
-
 		let today = new Date();
 		
-		for( let d of register.get ) {
-    		description += '<@!'+d.discordId+'> : '+d.allyCode+'\n';
+		if( register.get.length > 0 ) {
+		    for( let d of register.get ) {
+        		embed.description += '<@!'+d.discordId+'> : '+d.allyCode+'\n';
+            }
+        } else {
+            embed.description += 'This user is not registered\n';
         }
-		message.channel.send(description);
+        
+		retMessage.edit({embed});
 		
 	} catch(e) {
 	    if( e.code === 400 ) {
             if( retMessage ) {
-                description += '\n**! There was an error completing this request**';
-                retMessage.edit(description); 
+                embed.description += '\n**! There was an error completing this request**';
+                retMessage.edit({embed}); 
             }
             message.reply(e.message);
 	    } else {

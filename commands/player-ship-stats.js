@@ -31,10 +31,10 @@ module.exports = async ( client, message ) => {
 
 		let today = new Date();
 		
-		embed.title = `${player.name} - ${unit.name}`;
+		embed.title = `${player.name} - ${player.allyCode}`;
         embed.description = '**L'+unit.level+'** | '+'★'.repeat(unit.rarity)+'☆'.repeat(7-unit.rarity)+'\n';
 		embed.description += '**GP** : `'+unit.gp.toLocaleString()+'`\n';
-		embed.description += '`------------------------------`\n';
+		embed.description += '`-------------------------`\n';
 		
 		unit.skills.sort((a,b) => parseInt(a.id.charAt(0) - b.id.charAt(0)));
 		
@@ -54,7 +54,8 @@ module.exports = async ( client, message ) => {
             let sk = unit.skills.filter(s => s.id === sr.skillId);
             
             embed.description += '**'+stype+'** : ';
-            embed.description += '`'+(sk.length > 0 ? sk[0].tier : 1)+'` : `'+iability.nameKey+'`\n';
+            embed.description += '`'+(sk.length > 0 ? sk[0].tier : 1)+'` \n';
+            embed.description += '`'+iability.nameKey+'` \n';
         }        
 
         embed.fields = [];
@@ -76,21 +77,26 @@ module.exports = async ( client, message ) => {
                     let sk = unit.skills.filter(s => s.id === cs.skillId);
                     
                     embed.description += '**'+stype+'** : ';
-                    embed.description += '`'+(sk.length > 0 ? sk[0].tier : 1)+'` : `'+iability.nameKey+'`\n';
+                    embed.description += '`'+(sk.length > 0 ? sk[0].tier : 1)+'` \n';
+                    embed.description += '`'+iability.nameKey+'` \n';
                 
                 }
                 
                 value = '**L'+cmem[0].level+'** | **G'+cmem[0].gear+'** | '+'★'.repeat(cmem[0].rarity)+'☆'.repeat(7-cmem[0].rarity)+'\n';
+                value += '**GP** : `'+cmem[0].gp.toLocaleString()+'` \n';                
                 value += '**Mods** : \n`';
                 
                 let cmemods = cmem[0].mods.map(m => client.helpers.mods.level( m.level, m.tier ));
-                for( let m = 0; m < cmemods.length; ++m ) {
-                    value += cmemods[m];
-                    value += (m+1) % 2 === 0 ? '\n' : ', ';
+                if( cmemods.length > 0 ) {
+                    for( let m = 0; m < cmemods.length; ++m ) {
+                        value += cmemods[m];
+                        value += (m+1) % 3 === 0 ? '\n' : ', ';
+                    }
+                } else {
+                    value += 'None';
                 }
                 value += '`\n';
-                value += '**GP** : `'+cmem[0].gp.toLocaleString()+'`\n';                
-                value += '`------------------------------`\n';
+                value += '`-------------------------`\n';
                 
                 embed.fields.push({
                     name:"__**Pilot**__ : `"+cmem[0].name+"`",
@@ -101,10 +107,21 @@ module.exports = async ( client, message ) => {
             }          
         }
 
-        embed.description += '`------------------------------`\n';
+        embed.description += '`-------------------------`\n';
 
 		embed.color = 0x936EBB;
 		embed.timestamp = today;
+        embed.author = {
+            name:unit.name,
+            icon_url:client.swapi.imageUrl('author',{id:unit.defId})
+        }
+        embed.thumbnail = {
+            url:client.swapi.imageUrl('ship', {
+                id:unit.defId, 
+                rarity:unit.rarity,
+                level:unit.level
+            })
+        }
 
 		message.channel.send({embed});
 		
