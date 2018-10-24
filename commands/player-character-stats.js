@@ -20,11 +20,14 @@ module.exports = async ( client, message ) => {
 		let player = allycode ?
 			await client.swapi.player(allycode, client.settings.swapi.language) :
 			await client.swapi.player(discordId, client.settings.swapi.language);
-        if( !player ) { 
-	        let error = new Error('I could not find a player by this id or user');
-	        error.code = 400;
-	        throw error;
-        }
+
+		if( !player ) {
+		    message.reply('I could not find this player.\nMake sure the user is registered, or the allycode is correct.');
+		}
+
+		if( player.error ) { return message.reply(player.error); }
+
+
 
         //Get character from player roster
         let unit = await client.helpers.filterCharacter( unitName, player.roster );
@@ -121,7 +124,7 @@ module.exports = async ( client, message ) => {
             value += '`'+client.helpers.mods.set( m.set )+'`\n';
             
             value += '**Primary** : ';
-            value += '`'+m.primaryBonusValue+' '+client.helpers.mods.stat( m.primaryBonusType )+'`\n';
+            value += '`'+(m.primaryStat.value.toString().includes('.') ? m.primaryStat.value.toFixed(2)+"%" : m.primaryStat.value)+' '+client.helpers.mods.stat( m.primaryStat.unitStat )+'`\n';
 
             //value += '**Secondary Stats**\n';
             //value += m.secondaryType_1.length > 0 ? '`'+m.secondaryValue_1+' '+client.helpers.mods.stat( m.secondaryType_1 )+'`\n' : '';
@@ -142,7 +145,7 @@ module.exports = async ( client, message ) => {
 		embed.color = 0x936EBB;
 		embed.timestamp = today;
         embed.author = {
-            name:unit.name,
+            name:unit.nameKey,
             icon_url:client.swapi.imageUrl('author',{id:unit.defId})
         }
         embed.thumbnail = {

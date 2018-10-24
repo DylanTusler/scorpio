@@ -20,11 +20,14 @@ module.exports = async ( client, message ) => {
 		let player = allycode ?
 			await client.swapi.player(allycode, client.settings.swapi.language) :
 			await client.swapi.player(discordId, client.settings.swapi.language);
-        if( !player ) { 
-	        let error = new Error('I could not find a player by this id or user');
-	        error.code = 400;
-	        throw error;
-        }
+
+		if( !player ) {
+		    message.reply('I could not find this player.\nMake sure the user is registered, or the allycode is correct.');
+		}
+
+		if( player.error ) { return message.reply(player.error); }
+
+
 
         //Get character from player roster
         let unit = await client.helpers.filterShip( unitName, player.roster );
@@ -39,6 +42,7 @@ module.exports = async ( client, message ) => {
 		unit.skills.sort((a,b) => parseInt(a.id.charAt(0) - b.id.charAt(0)));
 		
 		let unitIndex = await client.swapi.unitIndex(client.settings.language);
+
 		    unitIndex = unitIndex.units.filter(u => u.baseId === unit.defId)[0];
 		
 		let skillIndex = await client.swapi.skillIndex(client.settings.language);
@@ -60,6 +64,7 @@ module.exports = async ( client, message ) => {
 
         embed.fields = [];
         let value = '';
+        let pilots = [];
         
         if( unitIndex.crewList.length > 0 ) {
             for( let crew of unitIndex.crewList ) {
@@ -104,6 +109,11 @@ module.exports = async ( client, message ) => {
                     inline:true
                 });
                 
+                cmem[0].zetas = cmem[0].skills.filter(s => s.isZeta && s.tier === 8).length;
+                cmem[0].zetas = cmem[0].zetas > 0 ? cmem[0].zetas : null;
+                
+                pilots.push(`${cmem[0].defId}-${cmem[0].rarity}-${cmem[0].level}-${cmem[0].gear}-${cmem[0].zetas}`)
+                
             }          
         }
 
@@ -112,14 +122,16 @@ module.exports = async ( client, message ) => {
 		embed.color = 0x936EBB;
 		embed.timestamp = today;
         embed.author = {
-            name:unit.name,
+            name:unit.nameKey,
             icon_url:client.swapi.imageUrl('author',{id:unit.defId})
         }
+        
         embed.thumbnail = {
             url:client.swapi.imageUrl('ship', {
                 id:unit.defId, 
                 rarity:unit.rarity,
-                level:unit.level
+                level:unit.level,
+                pilots:pilots
             })
         }
 

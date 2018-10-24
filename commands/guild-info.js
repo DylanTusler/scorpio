@@ -1,13 +1,13 @@
 module.exports = async ( client, message ) => {
 	
-    let embed = {};
+	let embed = {};
 	let retMessage = null;
 	
 	try {
 		
 		let { allycode, discordId, rest } = await client.helpers.getId( message );
 
-        let calcMsg = '**I\'m looking up this guild, please wait...**';
+        let calcMsg = 'I\'m looking up this guild, **please wait...**';
         retMessage = await message.reply(calcMsg);
 
 		/** Get player from swapi cacher */
@@ -15,9 +15,12 @@ module.exports = async ( client, message ) => {
 			await client.swapi.guild(allycode, client.settings.swapi.language) :
 			await client.swapi.guild(discordId, client.settings.swapi.language);
 
-		/** 
-		 * REPORT OR PROCEED WITH TO DO STUFF WITH GUILD OBJECT 
-		 * */
+		if( !guild ) {
+		    return retMessage.edit('I could not find a guild.\nMake sure the user is registered, or the allycode used is guild affiliated.');
+		}
+
+		if( guild.error ) { return retMessage.edit(player.error); }
+
 		
 		let today = new Date();
 		let age = client.helpers.convertMS(today - new Date(guild.updated));
@@ -36,11 +39,14 @@ module.exports = async ( client, message ) => {
         calcMsg = '\n**Calculating roster, please wait...**';
         
         embed.description += calcMsg;
+        embed.image = { url:"https://media.discordapp.net/attachments/416390341533368321/502658773920514049/bb8s.gif" }
+
         await retMessage.edit({embed});
         embed.description = embed.description.replace(calcMsg,'');
-        
+        delete embed.image;
+                
         let unitIndex = await client.swapi.unitIndex(client.settings.swapi.language);
-        let charList = ["BASTILASHAN", "ENFYSNEST", "DARTHSION", "MAGMATROOPER", "EMPERORPALPATINE", "DARTHTRAYA" ];
+        let charList = ["BASTILASHAN", "ENFYSNEST", "DARTHTRAYA"];
         let shipList = ["HOUNDSTOOTH"];
         
         //Check message for any units
@@ -49,9 +55,9 @@ module.exports = async ( client, message ) => {
             charList = [];
             shipList = [];
             names.forEach(n => {
-                let ui = unitIndex.units.filter(u => u.nameKey.toLowerCase().includes(n.toLowerCase()));
-                ui = ui.filter(u => u.nameKey.toLowerCase().split(/\s/).includes(n.toLowerCase())).length > 0 ? ui.filter(u => u.nameKey.toLowerCase().split(/\s/).includes(n.toLowerCase())) : ui;
-                ui = ui.filter(u => u.nameKey.toLowerCase() === n.toLowerCase()).length > 0 ? ui.filter(u => u.nameKey.toLowerCase() === n.toLowerCase()) : ui;
+                let ui = unitIndex.units.filter(u => u.nameKey.replace(/[\\'|\\"|\\-]*/g,'').toLowerCase().includes(n.replace(/[\\'|\\"|\\-]*/g,'').toLowerCase()));
+                ui = ui.filter(u => u.nameKey.replace(/[\\'|\\"|\\-]*/g,'').toLowerCase().split(/\s/).includes(n.replace(/[\\'|\\"|\\-]*/g,'').toLowerCase())).length > 0 ? ui.filter(u => u.nameKey.replace(/[\\'|\\"|\\-]*/g,'').toLowerCase().split(/\s/).includes(n.replace(/[\\'|\\"|\\-]*/g,'').toLowerCase())) : ui;
+                ui = ui.filter(u => u.nameKey.replace(/[\\'|\\"|\\-]*/g,'').toLowerCase() === n.replace(/[\\'|\\"|\\-]*/g,'').toLowerCase()).length > 0 ? ui.filter(u => u.nameKey.replace(/[\\'|\\"|\\-]*/g,'').toLowerCase() === n.replace(/[\\'|\\"|\\-]*/g,'').toLowerCase()) : ui;
                 ui.forEach( u => {    
                     if( u.combatType === 'CHARACTER' || u.combatType === 1 ) {
                         if( !charList.includes( u.baseId ) ) { 
@@ -72,31 +78,44 @@ module.exports = async ( client, message ) => {
         let zetas = 0;
         
         let allycodes = guild.roster.map(p => p.allyCode);
-        let units = await client.swapi.units( allycodes, client.settings.swapi.language );
+        let units = null;
+        try {
+            units = await client.swapi.units( allycodes, client.settings.swapi.language );
+            if( !units ) {             
+	            let error = new Error('Error fetching units from swgoh.help');
+	            error.code = 400;
+	            throw error;
+            }
+        } catch(e) {
+            console.error(e);
+            let error = new Error('Error fetching units from swgoh.help');
+            error.code = 400;
+            throw error;
+        }
          
         let unitIds = Object.keys(units);
         let shipGP = unitIds.map(id => { 
             if( units[id][0].type === 'SHIP' || units[id][0].type === 2 ) {
-                return units[id].reduce((total,num) => parseInt(parseInt(total || 0) + parseInt(num.gp || 0)));
+                return units[id].reduce((total,num) => parseInt(parseInt(total || 0) + parseInt(num.gp || 0)),0);
             }
             return 0;
         });
-        shipGP = shipGP.filter(s => s && s > 0);
-        shipGP = shipGP.reduce((total,num) => parseInt(parseInt(total) + parseInt(num)));
+        shipGP = shipGP.filter(s => s);
+        shipGP = shipGP.reduce((total,num) => parseInt(parseInt(total) + parseInt(num)),0);
         
         let charGP = unitIds.map(id => { 
             if( units[id][0].type === 'CHARACTER' || units[id][0].type === 1 ) {
-                return units[id].reduce((total,num) => parseInt(parseInt(total || 0) + parseInt(num.gp || 0)));
+                return units[id].reduce((total,num) => parseInt(parseInt(total || 0) + parseInt(num.gp || 0)),0);
             }
             return 0;
         });
-        charGP = charGP.filter(c => c && c > 0);
-        charGP = charGP.reduce((total,num) => parseInt(parseInt(total) + parseInt(num)));
+        charGP = charGP.filter(c => c);
+        charGP = charGP.reduce((total,num) => parseInt(parseInt(total) + parseInt(num)),0);
         
-        //embed.description += '**Calculated GP**: `'+(parseInt(shipGP)+parseInt(charGP)).toLocaleString()+'`\n';
-        //embed.description += '**Calculated Char GP**: `'+charGP.toLocaleString()+'`\n';
-        //embed.description += '**Calculated Ship GP**: `'+shipGP.toLocaleString()+'`\n';
-		//embed.description += '`------------------------------`\n';
+        embed.description += '**Calculated GP**: `'+(parseInt(shipGP)+parseInt(charGP)).toLocaleString()+'`\n';
+        embed.description += '**Calculated Char GP**: `'+charGP.toLocaleString()+'`\n';
+        embed.description += '**Calculated Ship GP**: `'+shipGP.toLocaleString()+'`\n';
+		embed.description += '`------------------------------`\n';
                 
         embed.fields = [];
         let value = null;

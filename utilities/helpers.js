@@ -3,9 +3,9 @@ module.exports = {
     filterCharacter: async ( name, roster ) => {
         try {
         
-            let unit = roster.filter(u => u.type === 'CHARACTER' || u.type === 1);
-                unit = unit.filter(u => u.name.toLowerCase().includes(name.toLowerCase()));
-                unit = unit.filter(u => u.name.toLowerCase() === name.toLowerCase()).length > 0 ? unit.filter(u => u.name.toLowerCase() === name.toLowerCase()) : unit;
+            let unit = roster.filter(u => u.combatType === 'CHARACTER' || u.combatType === 1);
+                unit = unit.filter(u => u.nameKey.replace(/[\'|\"|\-]*/g,'').toLowerCase().includes(name.replace(/[\'|\"|\-]*/g,'').toLowerCase()));
+                unit = unit.filter(u => u.nameKey.replace(/[\'|\"|\-]*/g,'').toLowerCase() === name.replace(/[\'|\"|\-]*/g,'').toLowerCase()).length > 0 ? unit.filter(u => u.nameKey.replace(/[\'|\"|\-]*/g,'').toLowerCase() === name.replace(/[\'|\"|\-]*/g,'').toLowerCase()) : unit;
            
             if( unit.length === 0 ) { 
 	            let error = new Error('I could not match *character* "'+name+'"');
@@ -23,10 +23,10 @@ module.exports = {
     filterShip: async ( name, roster ) => {
         try {
         
-            let unit = roster.filter(u => u.type === 'SHIP' || u.type === 2);
-                unit = unit.filter(u => u.name.toLowerCase().includes(name.toLowerCase()));
-                unit = unit.filter(u => u.name.toLowerCase() === name.toLowerCase()).length > 0 ? unit.filter(u => u.name.toLowerCase() === name.toLowerCase()) : unit;
-           
+            let unit = roster.filter(u => u.combatType === 'SHIP' || u.combatType === 2);
+                unit = unit.filter(u => u.nameKey.replace(/[\'|\"|\-]*/g,'').toLowerCase().includes( name.replace(/[\'|\"|\-]*/g,'').toLowerCase() ));
+                unit = unit.filter(u => u.nameKey.replace(/[\'|\"|\-]*/g,'').toLowerCase() === name.replace(/[\'|\"|\-]*/g,'').toLowerCase()).length > 0 ? unit.filter(u => u.nameKey.replace(/[\'|\"|\-]*/g,'').toLowerCase() === name.replace(/[\'|\"|\-]*/g,'').toLowerCase()) : unit;
+
             if( unit.length === 0 ) { 
 	            let error = new Error('I could not match *ship* "'+name+'"');
 	            error.code = 400;

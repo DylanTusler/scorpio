@@ -1,5 +1,5 @@
 module.exports = async ( client, message ) => {
-	
+
     let embed = {};
 	let retMessage = null;
 		
@@ -24,8 +24,8 @@ module.exports = async ( client, message ) => {
         }
         
         unitIndex = unitIndex.units.filter(u => u.combatType === 'SHIP' || u.combatType === 2);
-        unitIndex = unitIndex.filter(u => u.nameKey.toLowerCase() === unitName.toLowerCase() || u.nameKey.toLowerCase().includes(unitName.toLowerCase()));
-        unitIndex = unitIndex.filter(u => u.nameKey.toLowerCase() === unitName.toLowerCase()).length > 0 ? unitIndex.filter(u => u.nameKey.toLowerCase() === unitName.toLowerCase()) : unitIndex;
+        unitIndex = unitIndex.filter(u => u.nameKey.replace(/[\'|\"|\-]*/g,'').toLowerCase() === unitName.replace(/[\'|\"|\-]*/g,'').toLowerCase() || u.nameKey.replace(/[\'|\"|\-]*/g,'').toLowerCase().includes(unitName.replace(/[\'|\"|\-]*/g,'').toLowerCase()));
+        unitIndex = unitIndex.filter(u => u.nameKey.replace(/[\'|\"|\-]*/g,'').toLowerCase() === unitName.replace(/[\'|\"|\-]*/g,'').toLowerCase()).length > 0 ? unitIndex.filter(u => u.nameKey.replace(/[\'|\"|\-]*/g,'').toLowerCase() === unitName.replace(/[\'|\"|\-]*/g,'').toLowerCase()) : unitIndex;
         if( !unitIndex || unitIndex.length === 0 ) { 
 	        let error = new Error('I could not match *ship* "'+unitName+'"');
 	        error.code = 400;
@@ -40,12 +40,11 @@ module.exports = async ( client, message ) => {
 			await client.swapi.guild(allycode, client.settings.swapi.language) :
 			await client.swapi.guild(discordId, client.settings.swapi.language);
 
-        if( !guild ) { 
-	        let error = new Error('I could not find a guild for this id or user');
-	        error.code = 400;
-	        throw error;
-        }
+		if( !guild ) {
+		    return retMessage.edit('I could not find a guild.\nMake sure the user is registered, or the allycode used is guild affiliated.');
+		}
 
+		if( guild.error ) { return retMessage.edit(player.error); }
 		
 		let today = new Date();
 		let age = client.helpers.convertMS(today - new Date(guild.updated));
@@ -59,10 +58,12 @@ module.exports = async ( client, message ) => {
 
         calcMsg = '`-------------------------`\nGuild found!\nCalculating roster, **please wait...**';
         embed.description = calcMsg;
+        embed.image = { url:"https://media.discordapp.net/attachments/416390341533368321/502658773920514049/bb8s.gif" }
+
         await retMessage.edit({embed});
         embed.description = embed.description.replace(calcMsg,'');
-        
-
+        delete embed.image;
+       
         let players = [];
         for( let p of guild.roster ) {
             players.push(await client.swapi.player( p.allyCode ));

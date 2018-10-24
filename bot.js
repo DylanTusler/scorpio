@@ -118,7 +118,9 @@ client.on('message', async (message) => {
 		/** Ignore condition **/
 		if( !command || !client.settings.commandsMap[command] ) { return; }
 		log.command = command;
-		
+		//await message.react('💩');	
+		//return message.reply('sorry... i\'m broke at the moment and will return when my master gets his shit together\n...likely another few days, sorry.\nFeel free to complain with: `$complain <complaint>`');
+
 		//Do command
 		await client.helpers.checkClientPermissions( client, message );
 		

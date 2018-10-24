@@ -3,14 +3,16 @@ module.exports = async ( client, message ) => {
 	try {
 		
 		/** Get the event schedule from swapi cacher */
-		let events = await client.swapi.events(client.settings.swapi.language);
-
+		let data = await client.swapi.events(client.settings.swapi.language);
+        let events = data.events;
+        
 		/** 
 		 * REPORT OR PROCEED TO DO STUFF WITH EVENTS
 		 * */
 
-		let today = new Date();
-		
+		let today = new Date()
+		    today = today.setHours(today.getHours() - 24);
+		    
 		let embed = {};
 		embed.title = 'Current event schedule';
 		embed.description = '`------------------------------`\n';
@@ -38,10 +40,10 @@ module.exports = async ( client, message ) => {
             }
             
             //Append to schedule
-            for( let i of ev.instances ) {
-            
+            for( let i of ev.instanceList ) {
+        		if( client.debug ) { console.log( JSON.stringify(i) ); }                
                 //Ignore completed events and append active and upcoming
-                if( i.endTime < today.getTime() ) { continue; }
+                if( i.endTime < today ) { continue; }
                 schedule.push({ name:ev.nameKey, startTime:i.startTime });
             
             }

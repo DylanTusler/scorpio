@@ -62,9 +62,9 @@ function imageUrl( type, params ) {
     url += params.gear   ? "&gear="+params.gear      : '';
     url += params.rarity ? "&rarity="+params.rarity  : '';
     url += params.zetas  ? "&zetas="+params.zetas    : '';
-    url += params.hardware  ? "&hw="+params.hardware : '';
-    url += params.pilots  ? "&pilots="+params.polits : '';
+    url += params.pilots  ? "&pilots="+params.pilots.join('|') : '';
     
+    //console.log(url);
     return url;
 
 }
@@ -176,31 +176,35 @@ async function player( id, language ) {
 		
         let expiredDate = new Date();
 	        expiredDate.setHours(expiredDate.getHours() - playerCooldown);
-		
+
+
 		/** Get player from cache */
 		let player = allycode ?
 			await cache.get('swapi', 'players', {allyCode:allycode, updated:{ $gte:expiredDate.getTime() }}) :
-			null; //await cache.get('swapi', 'players', {discordId:discordId, updated:{ $gte:expiredDate.getTime() }});
+			null;
 
+        
 		/** Check if existance and expiration */
 		if( !player || player.length === 0 ) { 
-		
+		    
 			/** If not found or expired, fetch new from API and save to cache */
 			player = allycode ? 
-				await swgoh.fetchPlayer({ allycodes:[allycode], language:language, enums:true }) :
-				await swgoh.fetchPlayer({ discordIds:[discordId], language:language, enums:true });
-			
+			    await swgoh.fetchPlayer({ allycodes:[allycode], language:language, enums:true }) :
+			    await swgoh.fetchPlayer({ discordIds:[discordId], language:language, enums:true });
+
 			if( !player || player.length === 0 ) { 
 				throw new Error('No player found'); 
 			} 
 			
 			//if( discordId ) { player[0].discordId = discordId; }
 			for( let p of player ) {
+			    p.updated = p.updated || (new Date()).getTime();
 			    p = await cache.put('swapi', 'players', {allyCode:p.allyCode}, p);
 			}
+			
 		} 
-
-        return Array.isArray(player) ? player[0] : player;
+        
+		return Array.isArray(player) ? player[0] : player;
 		
 	} catch(e) { 
 		throw e; 
@@ -231,14 +235,23 @@ async function guild( id, language ) {
 
 		/** Check if existance and expiration */
 		if( !guild || !guild[0] ) { 
-		
+
 			/** If not found or expired, fetch new from API and save to cache */
 			guild = await swgoh.fetchGuild({ allycode:player.allyCode, language:language, enums:true });
-			guild = await cache.put('swapi', 'guilds', {name:guild.name}, guild);
+			guild = await cache.put('swapi', 'guilds', {name:guild[0].name}, guild[0]);
+			
+			if( !player || player.length === 0 ) { 
+				throw new Error('No guild found'); 
+			} 
+			
+			let groster = await swgoh.fetchGuild({ allycode:player.allyCode, language:language, enums:true, roster:true });
+			for( let p of groster.roster ) {
+			    p.updated = p.updated || (new Date()).getTime();
+			    p = await cache.put('swapi', 'players', {allyCode:p.allyCode}, p);
+			}
 			
 		} else {
-			/** If found and valid, serve from cache */
-			guild = guild[0];
+		    guild = guild[0];
 		}
 		
 		return guild;
@@ -459,7 +472,9 @@ async function unitIndex(language) {
                     "language": language,
                     "enums":true,
                     "match": {
-                    	"rarity": 7
+                        "rarity": 7,
+                        "obtainable": true, 
+                        "obtainableTime": 0                     	
                     },
                     "project": {
                         "baseId": 1,
@@ -484,6 +499,7 @@ async function unitIndex(language) {
 		    units = units[0];
 		}
 
+        units.units = units.units.filter(u => u.baseId !== 'AWAKENEDREY');
 		return units;
 		
 	} catch(e) { 

@@ -4,10 +4,10 @@
   "description": "Discord nodejs bot for Star Wars Galaxy of Heroes. Integrated swgoh.help api with mongodb caching.",
   "main": "bot.js",
   "dependencies": {
-    "api-swgoh-help": "^3.0.9",
+    "api-swgoh-help": "^3.1.6",
     "discord.js": "^11.3.2",
     "google-translate-api": "^2.3.0",
-    "mongodb": "^3.1.6",
+    "mongodb": "^3.1.8",
     "webshot": "^0.18.0"
   },
   "repository": {

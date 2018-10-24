@@ -10,9 +10,12 @@ module.exports = async ( client, message ) => {
 			await client.swapi.player(allycode, client.settings.swapi.language) :
 			await client.swapi.player(discordId, client.settings.swapi.language);
 		
-		/** 
-		 * REPORT OR PROCEED TO DO STUFF WITH PLAYER OBJECT 
-		 * */
+		if( !player ) {
+		    message.reply('I could not find this player.\nMake sure the user is registered, or the allycode is correct.');
+		}
+
+		if( player.error ) { return message.reply(player.error); }
+
 
 		let today = new Date();
 		let age = client.helpers.convertMS(today - new Date(player.updated));
@@ -26,9 +29,9 @@ module.exports = async ( client, message ) => {
 
 
         let total = 0;
-        let characters = player.roster.filter(u => u.type === 'CHARACTER' || u.type === 1);
+        let characters = player.roster.filter(u => u.combatType === 'CHARACTER' || u.combatType === 1);
         let zetas = characters.map(c => {
-            return { name:c.name, zs:c.skills.filter(s => s.isZeta && s.tier === 8) }
+            return { name:c.nameKey, zs:c.skills.filter(s => s.isZeta && s.tier === 8) }
         }).sort((a,b) => b.zs.length - a.zs.length);
 
         for( let z of zetas ) {

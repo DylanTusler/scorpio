@@ -21,15 +21,16 @@ module.exports = async ( client, message ) => {
 			await client.swapi.player(allycode, client.settings.swapi.language) :
 			await client.swapi.player(discordId, client.settings.swapi.language);
 
-        if( !player ) { 
-	        let error = new Error('I could not find a player by this id or user');
-	        error.code = 400;
-	        throw error;
-        }
+		if( !player ) {
+		    message.reply('I could not find this player.\nMake sure the user is registered, or the allycode is correct.');
+		}
+
+		if( player.error ) { return message.reply(player.error); }
+
 
         let unit = player.roster.filter(u => u.type === 'CHARACTER' || u.type === 1);
-            unit = player.roster.filter(u => u.name.toLowerCase().includes(unitName.toLowerCase()));
-            unit = player.roster.filter(u => u.name.toLowerCase() === unitName.toLowerCase()).length > 0 ? player.roster.filter(u => u.name.toLowerCase() === unitName.toLowerCase()) : unit;
+            unit = player.roster.filter(u => u.nameKey.replace(/[\'\"\-]*/g,'').toLowerCase().includes(unitName.replace(/[\'\"\-]*/g,'').toLowerCase()));
+            unit = player.roster.filter(u => u.nameKey.replace(/[\'\"\-]*/g,'').toLowerCase() === unitName.replace(/[\'\"\-]*/g,'').toLowerCase()).length > 0 ? player.roster.filter(u => u.nameKey.replace(/[\'\"\-]*/g,'').toLowerCase() === unitName.replace(/[\'\"\-]*/g,'').toLowerCase()) : unit;
        
         if( unit.length === 0 ) { 
 	        let error = new Error('I could not match *character* "'+unitName+'"');
@@ -50,6 +51,8 @@ module.exports = async ( client, message ) => {
         let count = 1;
         for( let m of unit[0].mods ) {
 
+            console.log( m );
+            
             let value = '';
             let name = '';
 
@@ -71,13 +74,13 @@ module.exports = async ( client, message ) => {
             value += '`'+client.helpers.mods.set( m.set )+'`\n';
             
             value += '**Primary Stat**\n';
-            value += '`'+m.primaryBonusValue+' '+client.helpers.mods.stat( m.primaryBonusType )+'`\n';
+            value += '`'+(m.primaryStat.value.toString().includes('.') ? m.primaryStat.value.toFixed(2)+"%" : m.primaryStat.value)+' '+client.helpers.mods.stat( m.primaryStat.unitStat )+'`\n';
 
             value += '**Secondary Stats**\n';
-            value += m.secondaryType_1.length > 0 ? '`'+m.secondaryValue_1+' '+client.helpers.mods.stat( m.secondaryType_1 )+'`\n' : '';
-            value += m.secondaryType_2.length > 0 ? '`'+m.secondaryValue_2+' '+client.helpers.mods.stat( m.secondaryType_2 )+'`\n' : '';
-            value += m.secondaryType_3.length > 0 ? '`'+m.secondaryValue_3+' '+client.helpers.mods.stat( m.secondaryType_3 )+'`\n' : '';
-            value += m.secondaryType_4.length > 0 ? '`'+m.secondaryValue_4+' '+client.helpers.mods.stat( m.secondaryType_4 )+'`\n' : '';
+            value += m.secondaryStat[0] ? '`'+(m.secondaryStat[0].value.toString().includes('.') ? m.secondaryStat[0].value.toFixed(2)+"%" : m.secondaryStat[0].value)+' '+client.helpers.mods.stat( m.secondaryStat[0].unitStat )+' ('+m.secondaryStat[0].roll+')`\n' : '';
+            value += m.secondaryStat[1] ? '`'+(m.secondaryStat[1].value.toString().includes('.') ? m.secondaryStat[1].value.toFixed(2)+"%" : m.secondaryStat[1].value)+' '+client.helpers.mods.stat( m.secondaryStat[1].unitStat )+' ('+m.secondaryStat[1].roll+')`\n' : '';
+            value += m.secondaryStat[2] ? '`'+(m.secondaryStat[2].value.toString().includes('.') ? m.secondaryStat[2].value.toFixed(2)+"%" : m.secondaryStat[2].value)+' '+client.helpers.mods.stat( m.secondaryStat[2].unitStat )+' ('+m.secondaryStat[2].roll+')`\n' : '';
+            value += m.secondaryStat[3] ? '`'+(m.secondaryStat[3].value.toString().includes('.') ? m.secondaryStat[3].value.toFixed(2)+"%" : m.secondaryStat[3].value)+' '+client.helpers.mods.stat( m.secondaryStat[3].unitStat )+' ('+m.secondaryStat[3].roll+')`\n' : '';
 
             value += '`-------------------------`\n';
             		
@@ -101,7 +104,7 @@ module.exports = async ( client, message ) => {
         }   
         
         embed.author = {
-            name:unit[0].name,
+            name:unit[0].nameKey,
             icon_url:client.swapi.imageUrl('author',{id:unit[0].defId})
         }
         embed.thumbnail = {

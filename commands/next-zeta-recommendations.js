@@ -17,9 +17,14 @@ module.exports = async ( client, message ) => {
 			await client.swapi.player(allycode, client.settings.swapi.language) :
 			await client.swapi.player(discordId, client.settings.swapi.language);
 		
+	    if( !player ) {
+		    message.reply('I could not find this player.\nMake sure the user is registered, or the allycode is correct.');
+		}
+
+		if( player.error ) { return message.reply(player.error); }
+		
 		/** Get the zeta recommendations from swapi cacher */
 		let recommendations = await client.swapi.zetas();
-
 
 		let today = new Date();
 		let age = client.helpers.convertMS(today - new Date(player.updated));
@@ -34,11 +39,12 @@ module.exports = async ( client, message ) => {
 	    let availableZetas = [];
         for( let z of recommendations.zetas ) {
             let skill = player.roster.map(u => {
+
                 if( u.level < 50 ) { return null; }
                 if( u.rarity < 6 ) { return null; }
                 if( u.gear < 8 ) { return null; }
                 
-                let ss = u.skills.filter(s => s.name === z.name);
+                let ss = u.skills.filter(s => s.nameKey === z.name);
                 if( ss.length === 0 ) { return null; }
                 
                 ss[0].rarity = u.rarity;

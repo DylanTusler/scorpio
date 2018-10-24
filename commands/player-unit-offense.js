@@ -13,6 +13,13 @@ module.exports = async ( client, message ) => {
 			await client.swapi.player(allycode, client.settings.swapi.language) :
 			await client.swapi.player(discordId, client.settings.swapi.language);
 
+		if( !player ) {
+		    message.reply('I could not find this player.\nMake sure the user is registered, or the allycode is correct.');
+		}
+
+		if( player.error ) { return message.reply(player.error); }
+
+
         let stats = await client.swapi.calcStats( player.allyCode, null, ["includeMods","withModCalc","gameStyle"] );
         
         /** 
@@ -31,7 +38,7 @@ module.exports = async ( client, message ) => {
         for( let s in stats ) {
             let pu = player.roster.filter(pru => pru.defId === s);
             offense.push({
-                unit:pu[0].name,
+                unit:pu[0].nameKey,
                 physical:{
                     damage:stats[s].stats.final["Physical Damage"],
                     bonus:stats[s].stats.mods["Physical Damage"]

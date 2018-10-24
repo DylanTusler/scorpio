@@ -31,6 +31,8 @@ module.exports = async ( client, message ) => {
 		
 		let today = new Date();
 		
+		if( client.debug ) { console.log( register ); }
+
 		if( register.get.length > 0 ) {
 		    for( let d of register.get ) {
         		embed.description += '<@!'+d.discordId+'> : '+d.allyCode+'\n';
