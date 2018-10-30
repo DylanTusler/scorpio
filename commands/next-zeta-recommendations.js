@@ -9,7 +9,7 @@ module.exports = async ( client, message ) => {
 		let { allycode, discordId, rest } = await client.helpers.getId( message );
 
         //Get criteria name from message
-        let criteria = rest;
+        let criteria = rest.toLowerCase();
         criteria = ["pvp", "tw", "tb", "pit", "tank", "sith"].includes(criteria) ? criteria : 'versa';
         
 		/** Get player from swapi cacher */
